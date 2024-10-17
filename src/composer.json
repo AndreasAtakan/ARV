@@ -1,0 +1,21 @@
+{
+    "name": "andreas/arv",
+    "description": "",
+    "type": "project",
+    "require": {
+        "geoip2/geoip2": "^2.13",
+        "aws/aws-sdk-php": "^3.282"
+    },
+    "license": "None",
+    "autoload": {
+        "psr-4": {
+            "Andreas\\Arv\\": ""
+        }
+    },
+    "authors": [
+        {
+            "name": "AndreasAtakan",
+            "email": "aca@geotales.io"
+        }
+    ]
+}

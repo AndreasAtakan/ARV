@@ -1,0 +1,57 @@
+/*******************************************************************************
+* Copyright (C) Nordfjord EDB AS - All Rights Reserved                         *
+*                                                                              *
+* Unauthorized copying of this file, via any medium is strictly prohibited     *
+* Proprietary and confidential                                                 *
+* Written by Andreas Atakan <aca@geotales.io>, September 2023                  *
+*******************************************************************************/
+
+@charset "UTF-8";
+
+
+
+html, body {
+	padding: 0;
+	margin: 0;
+}
+
+/*hr { margin: 5rem 0; }*/
+
+.h-0 { display: none !important; }
+
+.btn:not(.rounded),
+.modal-content,
+.dropdown-menu,
+input:not([type=radio]),
+textarea,
+select {
+	border-radius: 0 !important;
+	-moz-border-radius: 0 !important;
+	-webkit-border-radius: 0 !important;
+}
+
+input[type=number] { -moz-appearance: textfield; }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+.link-dark { color: black; }
+
+.text-shadow {
+	text-shadow: #404040 -1px 1px 2px;
+	-webkit-font-smoothing: antialiased;
+}
+.text-shadow-dark {
+	text-shadow: #000 -1px 1px 2px;
+	-webkit-font-smoothing: antialiased;
+}
+.text-shadow-light {
+	text-shadow: #fff -1px 1px 2px;
+	-webkit-font-smoothing: antialiased;
+}
+
+.text-purple { color: purple !important; }
+.text-red { color: darkred !important; }
+.text-green { color: darkgreen !important; }

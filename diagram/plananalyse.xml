@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="Electron" modified="2023-11-07T13:33:33.666Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.0.3 Chrome/114.0.5735.289 Electron/25.8.4 Safari/537.36" etag="OTNccYfj3R6_cSqO_8Pa" version="22.0.3" type="device">
+  <diagram name="Page-1" id="5ltj90Gsb5nNMS0Xr0Dy">
+    <mxGraphModel dx="1257" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="vMK40z-1QcF6FsX6JJAU-4" value="" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="46" y="126" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="vMK40z-1QcF6FsX6JJAU-1" value="Kommuneplan" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="40" y="40" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="vMK40z-1QcF6FsX6JJAU-3" value="" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="43" y="123" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="vMK40z-1QcF6FsX6JJAU-2" value="Kommunedelplaner" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+          <mxGeometry x="40" y="120" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="vMK40z-1QcF6FsX6JJAU-5" value="" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="46" y="206" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="vMK40z-1QcF6FsX6JJAU-6" value="" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="43" y="203" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="vMK40z-1QcF6FsX6JJAU-7" value="Reguleringsplaner" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="40" y="200" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="vMK40z-1QcF6FsX6JJAU-8" value="Sammenstilling av planene&lt;br&gt;&lt;div style=&quot;font-size: 9px;&quot;&gt;&lt;font style=&quot;font-size: 9px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;font style=&quot;font-size: 9px;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;font style=&quot;font-size: 9px;&quot;&gt;Regler for sammenstilling:&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;ol style=&quot;&quot;&gt;&lt;li style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;font style=&quot;font-size: 9px;&quot;&gt;Reguleringsplan har forrang foran kommuneplan&lt;/font&gt;&lt;/span&gt;&lt;/li&gt;&lt;li style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;font style=&quot;font-size: 9px;&quot;&gt;&lt;font style=&quot;font-size: 9px;&quot;&gt;Kommuneplaner med arealstatus 2 har forrang foran eldre reguleringsplan (for pbl 2008)&lt;/font&gt;&lt;br&gt;&lt;/font&gt;&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/div&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="320" y="65" width="190" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="vMK40z-1QcF6FsX6JJAU-9" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="vMK40z-1QcF6FsX6JJAU-1" target="vMK40z-1QcF6FsX6JJAU-8" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="300" y="160" as="sourcePoint" />
+            <mxPoint x="280" y="60" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vMK40z-1QcF6FsX6JJAU-10" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="vMK40z-1QcF6FsX6JJAU-2" target="vMK40z-1QcF6FsX6JJAU-8" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="300" y="160" as="sourcePoint" />
+            <mxPoint x="350" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vMK40z-1QcF6FsX6JJAU-11" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="vMK40z-1QcF6FsX6JJAU-7" target="vMK40z-1QcF6FsX6JJAU-8" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="300" y="160" as="sourcePoint" />
+            <mxPoint x="330" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vMK40z-1QcF6FsX6JJAU-13" value="Planmosaikk" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+          <mxGeometry x="600" y="120" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="vMK40z-1QcF6FsX6JJAU-14" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="vMK40z-1QcF6FsX6JJAU-8" target="vMK40z-1QcF6FsX6JJAU-13" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="160" as="sourcePoint" />
+            <mxPoint x="450" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jNVG_ov5zVw0lMmAvkup-1" value="Fjerning av allerede utbygde omrråder&lt;font style=&quot;font-size: 9px;&quot;&gt;&lt;br&gt;Med en 10m buffer&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="320" y="357.5" width="190" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="jNVG_ov5zVw0lMmAvkup-2" value="" style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;" parent="1" source="vMK40z-1QcF6FsX6JJAU-13" target="jNVG_ov5zVw0lMmAvkup-1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="300" as="sourcePoint" />
+            <mxPoint x="440" y="250" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="660" y="260" />
+              <mxPoint x="415" y="260" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jNVG_ov5zVw0lMmAvkup-3" value="FKB-Veg" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" parent="1" vertex="1">
+          <mxGeometry x="40" y="290" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="jNVG_ov5zVw0lMmAvkup-4" value="Planreserve / Tomtereserve" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+          <mxGeometry x="810" y="370" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="jNVG_ov5zVw0lMmAvkup-5" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="jNVG_ov5zVw0lMmAvkup-1" target="jNVG_ov5zVw0lMmAvkup-14" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="520" y="150" as="sourcePoint" />
+            <mxPoint x="550" y="490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jNVG_ov5zVw0lMmAvkup-6" value="FKB-Bygning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" parent="1" vertex="1">
+          <mxGeometry x="40" y="340" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="jNVG_ov5zVw0lMmAvkup-7" value="FKB-AR5&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;Arealtype: 11-Bebygd og 12-Samferdsel&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" parent="1" vertex="1">
+          <mxGeometry x="40" y="390" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="jNVG_ov5zVw0lMmAvkup-8" value="SSB-Arealbruk" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" parent="1" vertex="1">
+          <mxGeometry x="40" y="460" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="jNVG_ov5zVw0lMmAvkup-10" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="jNVG_ov5zVw0lMmAvkup-3" target="jNVG_ov5zVw0lMmAvkup-1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="520" y="150" as="sourcePoint" />
+            <mxPoint x="610" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jNVG_ov5zVw0lMmAvkup-11" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="jNVG_ov5zVw0lMmAvkup-6" target="jNVG_ov5zVw0lMmAvkup-1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="170" y="335" as="sourcePoint" />
+            <mxPoint x="330" y="376" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jNVG_ov5zVw0lMmAvkup-12" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="jNVG_ov5zVw0lMmAvkup-7" target="jNVG_ov5zVw0lMmAvkup-1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="180" y="345" as="sourcePoint" />
+            <mxPoint x="340" y="386" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jNVG_ov5zVw0lMmAvkup-13" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="jNVG_ov5zVw0lMmAvkup-8" target="jNVG_ov5zVw0lMmAvkup-1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="190" y="355" as="sourcePoint" />
+            <mxPoint x="350" y="396" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jNVG_ov5zVw0lMmAvkup-14" value="&lt;font style=&quot;font-size: 10px;&quot;&gt;Fjerne områder mindre enn 100m&lt;sup&gt;2&lt;/sup&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="575" y="367.5" width="170" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="jNVG_ov5zVw0lMmAvkup-15" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="jNVG_ov5zVw0lMmAvkup-14" target="jNVG_ov5zVw0lMmAvkup-4" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="520" y="400" as="sourcePoint" />
+            <mxPoint x="585" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,2220 @@
+<!--
+/*******************************************************************************
+* Copyright (C) Nordfjord EDB AS - All Rights Reserved                         *
+*                                                                              *
+* Unauthorized copying of this file, via any medium is strictly prohibited     *
+* Proprietary and confidential                                                 *
+* Written by Andreas Atakan <aca@geotales.io>, September 2023                  *
+*******************************************************************************/
+-->
+
+<!DOCTYPE html>
+<html lang="no">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="x-ua-compatible" content="ie=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+
+	<title>ARV – Arealregnskap med Visualisering</title>
+	<meta name="title" content="ARV" />
+	<meta name="description" content="Arealregnskap med Visualisering" />
+	<meta name="author" content="Nordfjord EDB AS" />
+	<meta name="copyright" content="Copyright(c) Nordfjord EDB AS. All rights reserved." />
+
+	<link rel="apple-touch-icon" sizes="180x180" href="assets/icon_apple-touch-icon.png" />
+	<link rel="icon" type="image/png" sizes="32x32" href="assets/icon_favicon-32x32.png" />
+	<link rel="icon" type="image/png" sizes="16x16" href="assets/icon_favicon-16x16.png" />
+	<link rel="manifest" href="assets/site.webmanifest" />
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+
+	<script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
+	<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" />
+
+	<!--link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" /-->
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+
+	<script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://code.highcharts.com/modules/data.js"></script>
+	<script src="https://code.highcharts.com/modules/drilldown.js"></script>
+	<script src="https://code.highcharts.com/modules/sunburst.js"></script>
+	<script src="https://code.highcharts.com/modules/exporting.js"></script>
+	<script src="https://code.highcharts.com/modules/export-data.js"></script>
+	<script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
+	<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+	<script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>
+
+	<link rel="stylesheet" href="lib/fontawesome/css/all.min.css" />
+	<!--script src="lib/fontawesome/js/all.min.js"></script-->
+
+	<link rel="stylesheet" href="css/main.css" />
+
+	<style type="text/css">
+
+		:root { --header-height: 56px; }
+
+		main {
+			height: calc(100vh - var(--header-height));
+			background-color: white;
+		}
+
+		#nav { background-color: #eba937 !important; }
+
+		#mapCont, #section { height: inherit; }
+		#mapCont {
+			position: absolute;
+			right: 0;
+			width: 76%;
+		}
+		#section {
+			position: absolute;
+			left: 0;
+			width: 24%;
+			min-width: 200px;
+			max-width: 50%;
+			resize: horizontal;
+			overflow-y: auto;
+		}
+
+		.modal-content #upload>.col,
+		.modal-content #upload>div[class^='col-'] { border: 1px dashed black; }
+
+		.color-preview {
+			display: inline-block;
+			border: 1px solid lightgrey;
+			border-radius: 2px;
+			width: 15px;
+			height: 15px;
+		}
+		.color-preview#eiendomsgrense { border: 2px solid red; }
+		.color-preview#overlapp_utbygging { background-color: #E6E600; }
+		.color-preview#overlapp_aapen_fastmark { background-color: #A3A375; }
+		.color-preview#overlapp_myr { background-color: #7575A3; }
+		.color-preview#overlapp_skog { background-color: #669900; }
+		.color-preview#overlapp_jordbruk { background-color: #CC9900; }
+		.color-preview#overlapp_kulturlandskap { background-color: #CC6600; }
+		.color-preview#overlapp_strandsone { background-color: #CC3300; }
+		.color-preview#overlapp_skredfaresone { background-color: #E60000; }
+		.color-preview#overlapp_flomsone { background-color: #0066CC; }
+		.color-preview#overlapp_villrein { background-color: #BF4080; }
+
+		.mapboxgl-ctrl {
+			-webkit-transition: opacity 0.4s;
+			-moz-transition: opacity 0.4s;
+			-ms-transition: opacity 0.4s;
+			-o-transition: opacity 0.4s;
+			transition: opacity 0.4s;
+		}
+		.custom-map-control {
+			margin-bottom: 4px !important;
+		}
+		.mapboxgl-ctrl-bottom-center {
+			position: absolute;
+			bottom: 0;
+			left: 50%;
+			transform: translateX(-50%);
+			z-index: 2;
+			pointer-events: none;
+		}
+		.mapboxgl-ctrl-bottom-center .mapboxgl-ctrl {
+			margin-bottom: 10px;
+		}
+		.mapboxgl-ctrl-geocoder {
+			min-width: auto !important;
+			max-width: 350px !important;
+			width: calc(100vw - 39px - 20px) !important;
+		}
+		.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon-search,
+		.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--button { 
+			top: 12px !important;
+		}
+		.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--input {
+			height: 45px !important;
+		}
+		.mapboxgl-popup .mapboxgl-popup-content {
+			max-width: 350px !important;
+			max-height: 280px !important;
+			overflow: auto;
+			padding: 15px 20px;
+		}
+		/*.mapboxgl-popup .mapboxgl-popup-close-button {}*/
+		.mapboxgl-popup #obj_report_add {
+			position: fixed;
+			top: 4px;
+			left: 4px;
+		}
+		.mapboxgl-popup #obj_report_add:hover { cursor: pointer; }
+
+		#map { min-height: 150px; }
+
+		#eiendomsgrense_loading,
+		#overlapp_loading { display: none; }
+
+		.highcharts-menu hr { margin: 2px 0; }
+		.highcharts-contextmenu { top: -24px !important; }
+		table.dataTable { margin-top: 0 !important; }
+
+		#report { overflow-y: auto; }
+		#report_tab button { padding: 0.1rem 0.5rem; }
+		#report_tab_content>.active {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			justify-content: flex-start;
+			align-items: flex-start;
+			row-gap: 10px;
+		}
+		#report #dashboard .graph {
+			/*overflow: visible !important;*/
+			width: calc(50% - 10px);
+			height: 250px;
+			border: 1px solid lightgrey;
+			margin: 5px;
+		}
+		#report #dashboard .graph.sub {
+			width: calc(33.3% - 10px);
+			height: 200px;
+		}
+		/*#report #dashboard .graph#add {
+			width: 150px;
+			height: 100px;
+		}
+		#report #dashboard #choose { overflow-y: auto; }
+		#report #dashboard #choose label { word-break: break-all; }*/
+		#report .active#balance { display: block; }
+		/* #report #table #search_table */
+		#report #table form .row { margin: 10px auto; }
+		#report #table #search_table tbody tr:hover { cursor: pointer; }
+
+		@media (max-width: 992px) {
+			#lg-margin-bottom { margin-bottom: 50px; }
+		}
+		@media (max-width: 768px) {
+			#md-margin-bottom { margin-bottom: 50px; }
+		}
+		@media (max-width: 576px) {
+			#mapCont, #section {
+				width: 100% !important;
+				max-width: none;
+			}
+			#mapCont { height: 50%; }
+			#section {
+				top: calc(50% + var(--header-height));
+				height: calc(50% - var(--header-height));
+				resize: none;
+			}
+		}
+
+	</style>
+</head>
+<body>
+
+	<header>
+		<nav class="navbar navbar-expand-sm navbar-dark shadow" id="nav">
+			<div class="container-fluid">
+				<a class="navbar-brand p-0" href="#">
+					<img src="assets/logo.png" class="rounded" alt="ARV" height="40" width="auto" />
+				</a>
+
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+
+				<div class="collapse navbar-collapse" id="navbarCollapse" style="flex-grow: 0;">
+					<ul class="navbar-nav w-100 my-2 my-sm-0 navbar-nav-scroll" style="--bs-scroll-height: 250px;">
+						<li class="nav-item me-sm-2">
+							<a class="nav-link" href="about.php#contact">Kontakt oss</a>
+						</li>
+						<li class="nav-item">
+							<a role="button" class="btn btn-sm btn-outline-light my-1" href="about.php">Mer om ARV</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</header>
+
+	<main role="main" class="p-0">
+		<!-- MODALS ARE PLACED HERE TO ENSURE THAT THEY ARE SHOWN WHEN MAP-FULLSCREEN IS PRESSED (must be inside the container element that is made fullscreen by the plugin) -->
+		<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="loadingModalLabel">Laster inn</h5>
+						<!--button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
+					</div>
+					<div class="modal-body">
+						<div class="spinner-border text-primary" role="status">
+							<span class="visually-hidden">Laster inn...</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade" id="errorModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="errorModalLabel" style="color: #b30000;">
+							<strong>Feil</strong>
+						</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<p>Noe gikk galt. Vennligst prøv på nytt.</p>
+						<p class="text-muted small">
+							Kode: <span id="errorCode"></span> <br />
+							<a class="text-decoration-none" id="errorSend" href="mailto:contact@geotales.io?subject=ARV feilmelding&body=(Legg ved et skjermbilde av feilmeldingen)">Send feilmelding</a>
+						</p>
+					</div>
+					<!--div class="modal-footer">
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Lukk</button>
+					</div-->
+				</div>
+			</div>
+		</div>
+
+		<div id="mapCont">
+			<div class="h-100" id="map"></div>
+
+			<div class="h-0" id="report">
+				<ul class="nav nav-tabs" id="report_tab" role="tablist">
+					<li class="nav-item" role="presentation">
+						<button type="button" role="tab" class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" aria-controls="dashboard" aria-selected="true">
+							<i class="fa-solid fa-chart-pie"></i>
+						</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button type="button" role="tab" class="nav-link" id="balance-tab" data-bs-toggle="tab" data-bs-target="#balance" aria-controls="balance" aria-selected="false">
+							<i class="fa-solid fa-table"></i>
+						</button>
+					</li>
+					<li class="nav-item me-sm-auto" role="presentation">
+						<button type="button" role="tab" class="nav-link" id="table-tab" data-bs-toggle="tab" data-bs-target="#table" aria-controls="table" aria-selected="false">
+							<i class="fa-solid fa-magnifying-glass"></i>
+						</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button type="button" class="nav-link" id="report_fullscreen">
+							<i class="fa-solid fa-chevron-up"></i>
+						</button>
+					</li>
+				</ul>
+				<div class="tab-content" id="report_tab_content">
+					<div class="tab-pane fade show active" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab" tabindex="0">
+						<p class="text-muted mx-3 my-2">Søk opp en andresse</p>
+					</div>
+					<div class="tab-pane fade" id="balance" role="tabpanel" aria-labelledby="balance-tab" tabindex="0">
+						<p class="text-muted mx-3 my-2">Søk opp en andresse</p>
+					</div>
+					<div class="tab-pane fade" id="table" role="tabpanel" aria-labelledby="table-tab" tabindex="0">
+						<h5 class="mx-3 my-2 w-100">Søk etter eiendommer i databasen</h5>
+						<p class="text-muted small mx-3 mb-0">Velg ønskede parametere og trykk søk</p>
+
+						<form class="container-fluid small" id="eiendomsøk">
+							<div class="row mt-0">
+								<div class="col-sm-5">
+									<div class="row g-0">
+										<div class="col-4">
+											<input class="form-control form-control-sm" list="kommuner" name="kommunenummer" placeholder="Kommune" />
+											<datalist id="kommuner"></datalist>
+										</div>
+
+										<div class="col-8">
+											<select class="form-select form-select-sm" name="eiendomstørrelse" aria-label="Størrelse på eiendommen">
+												<option selected disabled>Størrelse på eiendommen</option>
+												<option value="s">Mindre enn 1 daa</option>
+												<option value="m">Mellom 1 daa og 10 daa</option>
+												<option value="l">Mellom 10 daa og 50 daa</option>
+												<option value="xl">Større enn 50 daa</option>
+											</select>
+										</div>
+									</div>
+									<div class="row g-0">
+										<div class="col input-group input-group-sm">
+											<input type="number" class="form-control" name="gardsnummer" placeholder="Gårdsnr." aria-label="Gårdsnr" min="0" />
+											<input type="number" class="form-control" name="bruksnummer" placeholder="Bruksnr." aria-label="Bruksnr" min="0" />
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-7">
+									<div class="row">
+										<div class="col">
+											<div class="form-check">
+												<input type="checkbox" class="form-check-input" name="kommuneplan" id="kommuneplannivå" value="" />
+												<label for="kommuneplannivå" class="form-check-label">Utbyggingspotensiale på kommuneplan-nivå</label>
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col">
+											<div class="form-check">
+												<input type="checkbox" class="form-check-input" name="områderegulering" id="områdereguleringsnivå" value="" />
+												<label for="områdereguleringsnivå" class="form-check-label">Utbyggingspotensiale på områdereguleringsnivå</label>
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col">
+											<div class="form-check">
+												<input type="checkbox" class="form-check-input" name="detaljregulering" id="detaljreguleringsnivå" value="" />
+												<label for="detaljreguleringsnivå" class="form-check-label">Utbyggingspotensiale på detaljreguleringsnivå</label>
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col">
+											<div class="form-check">
+												<input type="checkbox" class="form-check-input" name="utenkulturminne" id="utenkulturminne" value="" />
+												<label for="utenkulturminne" class="form-check-label">Uten kulturminne</label>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col">
+									<div class="accordion" id="accordionSearchAdvanced">
+										<div class="accordion-item">
+											<h2 class="accordion-header">
+												<button type="button" class="accordion-button collapsed small px-3 py-2" data-bs-toggle="collapse" data-bs-target="#accordionSearchAdvanced-collapse" aria-expanded="false" aria-controls="accordionSearchAdvanced-collapse">Avanserte valg</button>
+											</h2>
+											<div id="accordionSearchAdvanced-collapse" class="accordion-collapse collapse" data-bs-parent="#accordionSearchAdvanced">
+												<div class="accordion-body container-fluid">
+													<div class="row">
+														<div class="col">
+															<div class="form-check">
+																<input type="checkbox" class="form-check-input" name="utenmyr" id="utenmyr" value="" />
+																<label for="utenmyr" class="form-check-label">Uten myrområder</label>
+															</div>
+														</div>
+														<div class="col">
+															<div class="form-check">
+																<input type="checkbox" class="form-check-input" name="utenskog" id="utenskog" value="" />
+																<label for="utenskog" class="form-check-label">Uten skogsområder</label>
+															</div>
+														</div>
+														<div class="col">
+															<div class="form-check">
+																<input type="checkbox" class="form-check-input" name="utenjordbruk" id="utenjordbruk" value="" />
+																<label for="utenjordbruk" class="form-check-label">Uten jordbruksområder</label>
+															</div>
+														</div>
+														<div class="col">
+															<div class="form-check">
+																<input type="checkbox" class="form-check-input" name="utenkulturlandskap" id="utenkulturlandskap" value="" />
+																<label for="utenkulturlandskap" class="form-check-label">Uten kulturlandskap</label>
+															</div>
+														</div>
+													</div>
+
+													<hr class="my-4" />
+
+													<div class="row">
+														<div class="col">
+															<div class="form-check">
+																<input type="checkbox" class="form-check-input" name="punktfeste" id="punktfeste" value="" />
+																<label for="punktfeste" class="form-check-label">Har punktfeste</label>
+															</div>
+														</div>
+														<div class="col">
+															<div class="form-check">
+																<input type="checkbox" class="form-check-input" name="avklartandeler" id="avklartandeler" value="" />
+																<label for="avklartandeler" class="form-check-label">Har avklarte andeler</label>
+															</div>
+														</div>
+														<div class="col">
+															<div class="form-check">
+																<input type="checkbox" class="form-check-input" name="avklarteiere" id="avklarteiere" value="" />
+																<label for="avklarteiere" class="form-check-label">Har avklarte eiere</label>
+															</div>
+														</div>
+														<div class="col">
+															<div class="form-check">
+																<input type="checkbox" class="form-check-input" name="haravtalegrensepunktfeste" id="haravtalegrensepunktfeste" value="" />
+																<label for="haravtalegrensepunktfeste" class="form-check-label">Avtale har grensepunktfeste</label>
+															</div>
+														</div>
+														<div class="col">
+															<div class="form-check">
+																<input type="checkbox" class="form-check-input" name="haravtalestedbundenrettighet" id="haravtalestedbundenrettighet" value="" />
+																<label for="haravtalestedbundenrettighet" class="form-check-label">Avtale har stedbunden rettighet</label>
+															</div>
+														</div>
+														<div class="col">
+															<div class="form-check">
+																<input type="checkbox" class="form-check-input" name="hargrunnforurensing" id="hargrunnforurensing" value="" />
+																<label for="hargrunnforurensing" class="form-check-label">Uten grunnforurensing</label>
+															</div>
+														</div>
+													</div>
+
+													<div class="row">
+														<div class="col">
+															<div class="form-check">
+																<input type="checkbox" class="form-check-input" name="harregistrertgrunnerverv" id="harregistrertgrunnerverv" value="" />
+																<label for="harregistrertgrunnerverv" class="form-check-label">Har registrert grunnerverv</label>
+															</div>
+														</div>
+														<div class="col">
+															<div class="form-check">
+																<input type="checkbox" class="form-check-input" name="harregistrertjordskiftekrevd" id="harregistrertjordskiftekrevd" value="" />
+																<label for="harregistrertjordskiftekrevd" class="form-check-label">Har registrert jordskifte krevd</label>
+															</div>
+														</div>
+														<div class="col">
+															<div class="form-check">
+																<input type="checkbox" class="form-check-input" name="teigmedflerematrikkelenheter" id="teigmedflerematrikkelenheter" value="" />
+																<label for="teigmedflerematrikkelenheter" class="form-check-label">Har flere matrikkelenheter</label>
+															</div>
+														</div>
+														<div class="col">
+															<div class="form-check">
+																<input type="checkbox" class="form-check-input" name="tvist" id="tvist" value="" />
+																<label for="tvist" class="form-check-label">Uten tvist</label>
+															</div>
+														</div>
+														<div class="col">
+															<div class="form-check">
+																<input type="checkbox" class="form-check-input" name="uregistrertjordsameie" id="uregistrertjordsameie" value="" />
+																<label for="uregistrertjordsameie" class="form-check-label">Har uregistrert jordsameie</label>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="row mt-4">
+								<div class="col">
+									<button type="submit" class="btn btn-secondary">Søk</button>
+								</div>
+							</div>
+						</form>
+
+						<div class="pt-4" id="search_results" style="border-top: 1px solid lightgrey;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="px-2 pb-3 shadow" id="section">
+			<!--div class="input-group input-group-sm my-3">
+				<button type="button" class="btn btn-outline-secondary dropdown-toggle" id="btnAccountsDrop" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+					<i class="fa-solid fa-ellipsis-vertical"></i>
+				</button>
+				<ul class="dropdown-menu" aria-labelledby="btnAccountsDrop">
+					<li>
+						<button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal">Hent ut rapport</button>
+					</li>
+					<li>
+						<--a class="dropdown-item" href="Dokumentasjon.pdf" target="_blank">Vis dokumentasjon</a->
+						<button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#docModal">Vis dokumentasjon</button>
+					</li>
+					<li><hr class="dropdown-divider" /></li>
+					<li>
+						<button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editModal">Rediger</button>
+					</li>
+				</ul>
+			</div-->
+
+
+			<h2 class="text-muted mt-3 mb-1">Undersøk din eiendom</h2>
+			<p class="text-muted mb-3">
+				Kartet viser landsdekkende eiendomsgrenser samt arealressurser og utbyggingspotensiale innenfor eiendommen.
+			</p>
+
+
+			<p class="small mb-3 d-inline-block">
+				<span class="color-preview" id="eiendomsgrense"></span> Eiendomsgrenser fra matrikkelen
+				&nbsp;
+				<i class="fa-solid fa-circle-info" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Viser teig samt gårds- og bruksnummer hentet fra åpne matrikkeldata"></i>
+			</p>
+			<div role="status" class="spinner-border spinner-border-sm text-secondary ms-1" id="eiendomsgrense_loading">
+				<span class="visually-hidden">Laster inn...</span>
+			</div>
+
+
+			<!--p class="small mb-1">
+				Potensielle utbyggingsområder innenfor eiendommen
+				&nbsp;
+				<a href="Dokumentasjon.pdf#page=19" target="_blank" class="text-dark">
+					<i class="fa-solid fa-circle-info" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Alle planlagte utbyggingsområder, hentet fra kommunenes planer/-delplaner og reguleringsplaner, hvor utbyggingen enda ikke er ferdigstilt.<br /><i>Trykk på ikonet</i> for å lese mer"></i>
+				</a>
+			</p>
+			<p class="small mb-3">
+				<span class="color-preview" id="planlagt_01"></span> 01 Bolig eller sentrumsformål <br />
+				<span class="color-preview" id="planlagt_02"></span> 02 Fritidsbebyggelse          <br />
+				<span class="color-preview" id="planlagt_03"></span> 03 Tjenesteyting              <br />
+				<span class="color-preview" id="planlagt_04"></span> 04 Handel                     <br />
+				<span class="color-preview" id="planlagt_05"></span> 05 Turistformål               <br />
+				<span class="color-preview" id="planlagt_06"></span> 06 Næringsvirksomhet          <br />
+				<span class="color-preview" id="planlagt_07"></span> 07 Råstoffutvinning           <br />
+				<span class="color-preview" id="planlagt_08"></span> 08 Kombinerte formål          <br />
+				<!-span class="color-preview" id="planlagt_09"></span> 09 Idrettsanlegg              <br /->
+				<!-span class="color-preview" id="planlagt_10"></span> 10 Andre formål               <br /->
+				<!-span class="color-preview" id="planlagt_11"></span> 11 Samferdselsanlegg          <br /->
+				<span class="color-preview" id="planlagt_12"></span> 12 Blå/grønnstruktur          <br />
+				<span class="color-preview" id="planlagt_13"></span> 13 Forsvaret                  <br />
+				<span class="color-preview" id="planlagt_14"></span> 14 LNFR                       <br />
+				<span class="color-preview" id="planlagt_15"></span> 15 LNFR spredt                <br />
+				<span class="color-preview" id="planlagt_16"></span> 16 Havner og småbåthavner     <br />
+				<span class="color-preview" id="planlagt_17"></span> 17 Sjø og vassdrag, flerbruk  <br />
+				<span class="color-preview" id="planlagt_18"></span> 18 Akvakultur                 <br />
+				<span class="color-preview" id="planlagt_19"></span> 19 Udefinert
+			</p-->
+
+
+			<p class="small mb-2 d-inline-block">
+				<!--span class="color-preview" id="overlapp"></span--> Arealer innenfor eiendommen
+				&nbsp;
+				<i class="fa-solid fa-circle-info" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Viser utvalgte kategorier innenfor eiendommens teiger.<br />Velg ønskede kategorier i listen under"></i>
+			</p>
+			<div role="status" class="spinner-border spinner-border-sm text-secondary ms-1" id="overlapp_loading">
+				<span class="visually-hidden">Laster inn...</span>
+			</div>
+
+			<div class="form-check form-control-sm m-0 py-0">
+				<input type="checkbox" class="form-check-input" id="utbyggingspotensiale" value="Utbyggingspotensiale" autocomplete="off" disabled />
+				<label class="form-check-label" for="utbyggingspotensiale">
+					&nbsp;
+					<!--a href="Dokumentasjon.pdf#page=19" target="_blank" class="text-dark text-decoration-none"-->
+						<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Potensielle utbyggingsområder, hentet fra kommunenes planer/-delplaner og reguleringsplaner, er områder hvor utbyggingen er planlagt men enda ikke er ferdigstilt."></i> <!-- <br /><i>Trykk på ikonet</i> for å lese mer -->
+					<!--/a-->
+					<span class="color-preview" id="overlapp_utbygging"></span> Potensielle utbyggingsområder
+				</label>
+			</div>
+				<div class="form-check form-control-sm ms-2 m-0 py-0" style="display: none;">
+					<input type="checkbox" class="form-check-input" id="_kommuneplan" data-parentlayer="utbyggingspotensiale" value="1" autocomplete="off" disabled />
+					<label class="form-check-label text-muted" for="_kommuneplan" style="font-size: 12px;">
+						&nbsp;
+						<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Planområder kun hentet fra kommuneplanens arealdel"></i>
+						Kommuneplan
+					</label>
+				</div>
+				<div class="form-check form-control-sm ms-2 m-0 py-0" style="display: none;">
+					<input type="checkbox" class="form-check-input" id="_annen_reguleringsplan" data-parentlayer="utbyggingspotensiale" value="2" autocomplete="off" disabled />
+					<label class="form-check-label text-muted" for="_annen_reguleringsplan" style="font-size: 12px;">
+						&nbsp;
+						<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Planområder hentet fra reguleringsplan som ikke er områderegulering eller detaljregulering"></i>
+						Annen reguleringsplan
+					</label>
+				</div>
+				<div class="form-check form-control-sm ms-2 m-0 py-0" style="display: none;">
+					<input type="checkbox" class="form-check-input" id="_områderegulering" data-parentlayer="utbyggingspotensiale" value="3" autocomplete="off" disabled />
+					<label class="form-check-label text-muted" for="_områderegulering" style="font-size: 12px;">
+						&nbsp;
+						<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Planområder kun hentet fra reguleringsplan som er områderegulering"></i>
+						Områderegulering
+					</label>
+				</div>
+				<div class="form-check form-control-sm ms-2 m-0 py-0" style="display: none;">
+					<input type="checkbox" class="form-check-input" id="_detaljregulering" data-parentlayer="utbyggingspotensiale" value="4" autocomplete="off" disabled />
+					<label class="form-check-label text-muted" for="_detaljregulering" style="font-size: 12px;">
+						&nbsp;
+						<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Planområder kun hentet fra reguleringsplan som er detaljregulering"></i>
+						Detaljregulering
+					</label>
+				</div>
+
+			<hr class="my-2" />
+
+			<div class="form-check form-control-sm m-0 py-0">
+				<input type="checkbox" class="form-check-input" id="aapen_fastmark" value="åpen fastmark" autocomplete="off" disabled />
+				<label class="form-check-label" for="aapen_fastmark">
+					&nbsp;
+					<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra FKB-AR5, arealtype 50-Åpen fastmark"></i>
+					<span class="color-preview" id="overlapp_aapen_fastmark"></span> Åpen fastmark
+				</label>
+			</div>
+
+			<div class="form-check form-control-sm m-0 py-0">
+				<input type="checkbox" class="form-check-input" id="myr" value="myr" autocomplete="off" disabled />
+				<label class="form-check-label" for="myr">
+					&nbsp;
+					<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra FKB-AR5, arealtype 60-Myr"></i>
+					<span class="color-preview" id="overlapp_myr"></span> Myr
+				</label>
+			</div>
+
+			<div class="form-check form-control-sm m-0 py-0">
+				<input type="checkbox" class="form-check-input" id="skog" value="skog" autocomplete="off" disabled />
+				<label class="form-check-label" for="skog">
+					&nbsp;
+					<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra FKB-AR5, arealtype 30-Skog"></i>
+					<span class="color-preview" id="overlapp_skog"></span> Skog
+				</label>
+			</div>
+				<div class="form-check form-control-sm ms-2 m-0 py-0" style="display: none;">
+					<input type="checkbox" class="form-check-input" id="_særs_høy" data-parentlayer="skog" value="15" autocomplete="off" disabled />
+					<label class="form-check-label text-muted" for="_særs_høy" style="font-size: 12px;">
+						&nbsp;
+						<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra FKB-AR5, arealtype 30-Skog"></i>
+						Særs høy bonitet
+					</label>
+				</div>
+				<div class="form-check form-control-sm ms-2 m-0 py-0" style="display: none;">
+					<input type="checkbox" class="form-check-input" id="_høy" data-parentlayer="skog" value="14" autocomplete="off" disabled />
+					<label class="form-check-label text-muted" for="_høy" style="font-size: 12px;">
+						&nbsp;
+						<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra FKB-AR5, arealtype 30-Skog"></i>
+						Høy bonitet
+					</label>
+				</div>
+				<div class="form-check form-control-sm ms-2 m-0 py-0" style="display: none;">
+					<input type="checkbox" class="form-check-input" id="_middels" data-parentlayer="skog" value="13" autocomplete="off" disabled />
+					<label class="form-check-label text-muted" for="_middels" style="font-size: 12px;">
+						&nbsp;
+						<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra FKB-AR5, arealtype 30-Skog"></i>
+						Middels bonitet
+					</label>
+				</div>
+				<div class="form-check form-control-sm ms-2 m-0 py-0" style="display: none;">
+					<input type="checkbox" class="form-check-input" id="_lav" data-parentlayer="skog" value="12" autocomplete="off" disabled />
+					<label class="form-check-label text-muted" for="_lav" style="font-size: 12px;">
+						&nbsp;
+						<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra FKB-AR5, arealtype 30-Skog"></i>
+						Lav bonitet
+					</label>
+				</div>
+				<div class="form-check form-control-sm ms-2 mb-2 m-0 py-0" style="display: none;">
+					<input type="checkbox" class="form-check-input" id="_impediment" data-parentlayer="skog" value="11" autocomplete="off" disabled />
+					<label class="form-check-label text-muted" for="_impediment" style="font-size: 12px;">
+						&nbsp;
+						<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra FKB-AR5, arealtype 30-Skog"></i>
+						Impediment
+					</label>
+				</div>
+
+			<div class="form-check form-control-sm m-0 py-0">
+				<input type="checkbox" class="form-check-input" id="jordbruk" value="jordbruk" autocomplete="off" disabled />
+				<label class="form-check-label" for="jordbruk">
+					&nbsp;
+					<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra FKB-AR5, arealtype 21-Fulldyrka jord, 22-Overflatedyrka jord eller 23-Innmarksbeite"></i>
+					<span class="color-preview" id="overlapp_jordbruk"></span> Jordbruk
+				</label>
+			</div>
+				<div class="form-check form-control-sm ms-2 m-0 py-0" style="display: none;">
+					<input type="checkbox" class="form-check-input" id="_fulldyrket" data-parentlayer="jordbruk" value="21" autocomplete="off" disabled />
+					<label class="form-check-label text-muted" for="_fulldyrket" style="font-size: 12px;">
+						&nbsp;
+						<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra FKB-AR5, arealtype 30-Skog"></i>
+						Fulldyrket jord
+					</label>
+				</div>
+				<div class="form-check form-control-sm ms-2 m-0 py-0" style="display: none;">
+					<input type="checkbox" class="form-check-input" id="_overflatedyrket" data-parentlayer="jordbruk" value="22" autocomplete="off" disabled />
+					<label class="form-check-label text-muted" for="_overflatedyrket" style="font-size: 12px;">
+						&nbsp;
+						<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra FKB-AR5, arealtype 30-Skog"></i>
+						Overflatedyrket jord
+					</label>
+				</div>
+				<div class="form-check form-control-sm ms-2 mb-2 m-0 py-0" style="display: none;">
+					<input type="checkbox" class="form-check-input" id="_innmarksbeite" data-parentlayer="jordbruk" value="23" autocomplete="off" disabled />
+					<label class="form-check-label text-muted" for="_innmarksbeite" style="font-size: 12px;">
+						&nbsp;
+						<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra FKB-AR5, arealtype 30-Skog"></i>
+						Innmarksbeite
+					</label>
+				</div>
+
+			<div class="form-check form-control-sm m-0 py-0">
+				<input type="checkbox" class="form-check-input" id="kulturlandskap" value="kulturlandskap" autocomplete="off" disabled />
+				<label class="form-check-label" for="kulturlandskap">
+					&nbsp;
+					<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra Miljødirektoratets datasett, Verdifulle kulturlandskap"></i>
+					<span class="color-preview" id="overlapp_kulturlandskap"></span> Kulturlandskap
+				</label>
+			</div>
+
+			<div class="form-check form-control-sm m-0 py-0">
+				<input type="checkbox" class="form-check-input" id="strandsone" value="strandsone" autocomplete="off" disabled />
+				<label class="form-check-label" for="strandsone">
+					&nbsp;
+					<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra SSBs data for Potensielt tilgjengelig strandsone"></i>
+					<span class="color-preview" id="overlapp_strandsone"></span> Strandsone
+				</label>
+			</div>
+
+			<!--div class="form-check form-control-sm m-0 py-0">
+				<input type="checkbox" class="form-check-input" id="over_skoggrense" value="over skoggrense" autocomplete="off" disabled />
+				<label class="form-check-label" for="over_skoggrense">
+					&nbsp;
+					<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra Miljødirektoratets Natur i Norge (NiN) landskapstyper data, vegetasjon 'KLG-VE-4 Bart fjell over skoggrensen' eller 'KLG-VE-3 Hei over skoggrensen'"></i>
+					Over skoggrensen
+				</label>
+			</div-->
+
+			<hr class="my-2" />
+
+			<div class="form-check form-control-sm m-0 py-0">
+				<input type="checkbox" class="form-check-input" id="skredfaresone" value="skredfaresone" autocomplete="off" disabled />
+				<label class="form-check-label" for="skredfaresone">
+					&nbsp;
+					<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra NVEs data for 100-års skredfaresoner"></i>
+					<span class="color-preview" id="overlapp_skredfaresone"></span> Skredfaresone
+				</label>
+			</div>
+
+			<div class="form-check form-control-sm m-0 py-0">
+				<input type="checkbox" class="form-check-input" id="flomsone" value="flomsone" autocomplete="off" disabled />
+				<label class="form-check-label" for="flomsone">
+					&nbsp;
+					<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra NVEs data for 10-års flomsoner"></i>
+					<span class="color-preview" id="overlapp_flomsone"></span> Flomsone
+				</label>
+			</div>
+
+			<div class="form-check form-control-sm m-0 py-0">
+				<input type="checkbox" class="form-check-input" id="villrein" value="villrein" autocomplete="off" disabled />
+				<label class="form-check-label" for="villrein">
+					&nbsp;
+					<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra Miljødirektoratets datasett, Villreinområder"></i>
+					<span class="color-preview" id="overlapp_villrein"></span> Villreinområder
+				</label>
+			</div>
+
+			<!--div class="form-check form-control-sm m-0 mb-4 py-0">
+				<input type="checkbox" class="form-check-input" id="iba" value="iba" autocomplete="off" disabled />
+				<label class="form-check-label" for="iba">
+					&nbsp;
+					<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra Important Bird Areas på birdlife.no"></i>
+					Viktige fugleområder
+				</label>
+			</div-->
+
+
+			<p class="mt-4 mb-1">
+				Laget med <a class="text-dark" href="https://geotales.io" target="_blank"><img src="https://geotales.io/assets/logo.png" width="auto" height="20" />eoTales</a>
+			</p>
+		</div>
+	</main>
+
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+	<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" />
+
+	<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+
+	<!--script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script-->
+
+	<script type="text/javascript" src="lib/moment.js"></script>
+	<script type="text/javascript" src="lib/turf.min.js"></script>
+
+	<script type="text/javascript" src="js/helper.js"></script>
+	<script type="text/javascript" src="js/CustomControl.js"></script>
+	<script type="text/javascript" src="js/CustomResizeObserver.js"></script>
+
+	<!--script type="text/javascript" src="js/report.js"></script-->
+
+	<script type="text/javascript">
+
+		const _WMS_SOURCE = "https://ogc.geotales.io",
+			  mapBounds = [[-22.951570821478555, 54.933532152245874], [48.58927731671932, 72.73727872150113]];
+		//const _GetMap = (layer, style) => `${_WMS_SOURCE}/geoserver/wms?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.3.0&request=GetMap&crs=EPSG:3857&transparent=true&width=256&height=256&styles=${style || ""}&layers=${layer}`,
+		//	  _GetFeatureInfo = (layer, x, y) => `${_WMS_SOURCE}/geoserver/wms?format=image/png&service=WMS&version=1.3.0&request=GetFeatureInfo&crs=EPSG:3857&transparent=true&width=256&height=256&styles=&layers=${layer}&query_layers=${layer}&info_format=text/html&feature_count=1&i=128&j=128&bbox=${x - 50},${y - 50},${x + 50},${y + 50}`,
+		//	  _GetTile = (layer, style) => `${_WMS_SOURCE}/geoserver/gwc/service/tms/1.0.0/${layer}@EPSG:900913@pbf/{z}/{x}/{y}.pbf`;
+		const _GetTile = layer => `${_WMS_SOURCE}/tiles/${layer}`;
+
+		const kommuner = [
+			[ "0301", "Oslo" ],
+			[ "1101", "Eigersund" ],
+			[ "1103", "Stavanger" ],
+			[ "1106", "Haugesund" ],
+			[ "1108", "Sandnes" ],
+			[ "1111", "Sokndal" ],
+			[ "1112", "Lund" ],
+			[ "1114", "Bjerkreim" ],
+			[ "1119", "Hå" ],
+			[ "1120", "Klepp" ],
+			[ "1121", "Time" ],
+			[ "1122", "Gjesdal" ],
+			[ "1124", "Sola" ],
+			[ "1127", "Randaberg" ],
+			[ "1130", "Strand" ],
+			[ "1133", "Hjelmeland" ],
+			[ "1134", "Suldal" ],
+			[ "1135", "Sauda" ],
+			[ "1144", "Kvitsøy" ],
+			[ "1145", "Bokn" ],
+			[ "1146", "Tysvær" ],
+			[ "1149", "Karmøy" ],
+			[ "1151", "Utsira" ],
+			[ "1160", "Vindafjord" ],
+			[ "1505", "Kristiansund" ],
+			[ "1506", "Molde" ],
+			[ "1508", "Ålesund" ],
+			[ "1511", "Vanylven" ],
+			[ "1514", "Sande" ],
+			[ "1515", "Herøy" ],
+			[ "1516", "Ulstein" ],
+			[ "1517", "Hareid" ],
+			[ "1520", "Ørsta" ],
+			[ "1525", "Stranda" ],
+			[ "1528", "Sykkylven" ],
+			[ "1531", "Sula" ],
+			[ "1532", "Giske" ],
+			[ "1535", "Vestnes" ],
+			[ "1539", "Rauma" ],
+			[ "1547", "Aukra" ],
+			[ "1554", "Averøy" ],
+			[ "1557", "Gjemnes" ],
+			[ "1560", "Tingvoll" ],
+			[ "1563", "Sunndal" ],
+			[ "1566", "Surnadal" ],
+			[ "1573", "Smøla" ],
+			[ "1576", "Aure" ],
+			[ "1577", "Volda" ],
+			[ "1578", "Fjord" ],
+			[ "1579", "Hustadvika" ],
+			[ "1580", "Haram" ],
+			[ "1804", "Bodø" ],
+			[ "1806", "Narvik" ],
+			[ "1811", "Bindal" ],
+			[ "1812", "Sømna" ],
+			[ "1813", "Brønnøy" ],
+			[ "1815", "Vega" ],
+			[ "1816", "Vevelstad" ],
+			[ "1818", "Herøy" ],
+			[ "1820", "Alstahaug" ],
+			[ "1822", "Leirfjord" ],
+			[ "1824", "Vefsn" ],
+			[ "1825", "Grane" ],
+			[ "1826", "Aarborte - Hattfjelldal" ],
+			[ "1827", "Dønna" ],
+			[ "1828", "Nesna" ],
+			[ "1832", "Hemnes" ],
+			[ "1833", "Rana" ],
+			[ "1834", "Lurøy" ],
+			[ "1835", "Træna" ],
+			[ "1836", "Rødøy" ],
+			[ "1837", "Meløy" ],
+			[ "1838", "Gildeskål" ],
+			[ "1839", "Beiarn" ],
+			[ "1840", "Saltdal" ],
+			[ "1841", "Fauske - Fuossko" ],
+			[ "1845", "Sørfold" ],
+			[ "1848", "Steigen" ],
+			[ "1851", "Lødingen" ],
+			[ "1853", "Evenes - Evenášši" ],
+			[ "1856", "Røst" ],
+			[ "1857", "Værøy" ],
+			[ "1859", "Flakstad" ],
+			[ "1860", "Vestvågøy" ],
+			[ "1865", "Vågan" ],
+			[ "1866", "Hadsel" ],
+			[ "1867", "Bø" ],
+			[ "1868", "Øksnes" ],
+			[ "1870", "Sortland - Suortá" ],
+			[ "1871", "Andøy" ],
+			[ "1874", "Moskenes" ],
+			[ "1875", "Hábmer - Hamarøy" ],
+			[ "3101", "Halden" ],
+			[ "3103", "Moss" ],
+			[ "3105", "Sarpsborg" ],
+			[ "3107", "Fredrikstad" ],
+			[ "3110", "Hvaler" ],
+			[ "3112", "Råde" ],
+			[ "3114", "Våler" ],
+			[ "3116", "Skiptvet" ],
+			[ "3118", "Indre Østfold" ],
+			[ "3120", "Rakkestad" ],
+			[ "3122", "Marker" ],
+			[ "3124", "Aremark" ],
+			[ "3201", "Bærum" ],
+			[ "3203", "Asker" ],
+			[ "3205", "Lillestrøm" ],
+			[ "3207", "Nordre Follo" ],
+			[ "3209", "Ullensaker" ],
+			[ "3212", "Nesodden" ],
+			[ "3214", "Frogn" ],
+			[ "3216", "Vestby" ],
+			[ "3218", "Ås" ],
+			[ "3220", "Enebakk" ],
+			[ "3222", "Lørenskog" ],
+			[ "3224", "Rælingen" ],
+			[ "3226", "Aurskog-Høland" ],
+			[ "3228", "Nes" ],
+			[ "3230", "Gjerdrum" ],
+			[ "3232", "Nittedal" ],
+			[ "3234", "Lunner" ],
+			[ "3236", "Jevnaker" ],
+			[ "3238", "Nannestad" ],
+			[ "3240", "Eidsvoll" ],
+			[ "3242", "Hurdal" ],
+			[ "3301", "Drammen" ],
+			[ "3303", "Kongsberg" ],
+			[ "3305", "Ringerike" ],
+			[ "3310", "Hole" ],
+			[ "3312", "Lier" ],
+			[ "3314", "Øvre Eiker" ],
+			[ "3316", "Modum" ],
+			[ "3318", "Krødsherad" ],
+			[ "3320", "Flå" ],
+			[ "3322", "Nesbyen" ],
+			[ "3324", "Gol" ],
+			[ "3326", "Hemsedal" ],
+			[ "3328", "Ål" ],
+			[ "3330", "Hol" ],
+			[ "3332", "Sigdal" ],
+			[ "3334", "Flesberg" ],
+			[ "3336", "Rollag" ],
+			[ "3338", "Nore og Uvdal" ],
+			[ "3401", "Kongsvinger" ],
+			[ "3403", "Hamar" ],
+			[ "3405", "Lillehammer" ],
+			[ "3407", "Gjøvik" ],
+			[ "3411", "Ringsaker" ],
+			[ "3412", "Løten" ],
+			[ "3413", "Stange" ],
+			[ "3414", "Nord-Odal" ],
+			[ "3415", "Sør-Odal" ],
+			[ "3416", "Eidskog" ],
+			[ "3417", "Grue" ],
+			[ "3418", "Åsnes" ],
+			[ "3419", "Våler" ],
+			[ "3420", "Elverum" ],
+			[ "3421", "Trysil" ],
+			[ "3422", "Åmot" ],
+			[ "3423", "Stor-Elvdal" ],
+			[ "3424", "Rendalen" ],
+			[ "3425", "Engerdal" ],
+			[ "3426", "Tolga" ],
+			[ "3427", "Tynset" ],
+			[ "3428", "Alvdal" ],
+			[ "3429", "Folldal" ],
+			[ "3430", "Os" ],
+			[ "3431", "Dovre" ],
+			[ "3432", "Lesja" ],
+			[ "3433", "Skjåk" ],
+			[ "3434", "Lom" ],
+			[ "3435", "Vågå" ],
+			[ "3436", "Nord-Fron" ],
+			[ "3437", "Sel" ],
+			[ "3438", "Sør-Fron" ],
+			[ "3439", "Ringebu" ],
+			[ "3440", "Øyer" ],
+			[ "3441", "Gausdal" ],
+			[ "3442", "Østre Toten" ],
+			[ "3443", "Vestre Toten" ],
+			[ "3446", "Gran" ],
+			[ "3447", "Søndre Land" ],
+			[ "3448", "Nordre Land" ],
+			[ "3449", "Sør-Aurdal" ],
+			[ "3450", "Etnedal" ],
+			[ "3451", "Nord-Aurdal" ],
+			[ "3452", "Vestre Slidre" ],
+			[ "3453", "Øystre Slidre" ],
+			[ "3454", "Vang" ],
+			[ "3901", "Horten" ],
+			[ "3903", "Holmestrand" ],
+			[ "3905", "Tønsberg" ],
+			[ "3907", "Sandefjord" ],
+			[ "3909", "Larvik" ],
+			[ "3911", "Færder" ],
+			[ "4001", "Porsgrunn" ],
+			[ "4003", "Skien" ],
+			[ "4005", "Notodden" ],
+			[ "4010", "Siljan" ],
+			[ "4012", "Bamble" ],
+			[ "4014", "Kragerø" ],
+			[ "4016", "Drangedal" ],
+			[ "4018", "Nome" ],
+			[ "4020", "Midt-Telemark" ],
+			[ "4022", "Seljord" ],
+			[ "4024", "Hjartdal" ],
+			[ "4026", "Tinn" ],
+			[ "4028", "Kviteseid" ],
+			[ "4030", "Nissedal" ],
+			[ "4032", "Fyresdal" ],
+			[ "4034", "Tokke" ],
+			[ "4036", "Vinje" ],
+			[ "4201", "Risør" ],
+			[ "4202", "Grimstad" ],
+			[ "4203", "Arendal" ],
+			[ "4204", "Kristiansand" ],
+			[ "4205", "Lindesnes" ],
+			[ "4206", "Farsund" ],
+			[ "4207", "Flekkefjord" ],
+			[ "4211", "Gjerstad" ],
+			[ "4212", "Vegårshei" ],
+			[ "4213", "Tvedestrand" ],
+			[ "4214", "Froland" ],
+			[ "4215", "Lillesand" ],
+			[ "4216", "Birkenes" ],
+			[ "4217", "Åmli" ],
+			[ "4218", "Iveland" ],
+			[ "4219", "Evje og Hornnes" ],
+			[ "4220", "Bygland" ],
+			[ "4221", "Valle" ],
+			[ "4222", "Bykle" ],
+			[ "4223", "Vennesla" ],
+			[ "4224", "Åseral" ],
+			[ "4225", "Lyngdal" ],
+			[ "4226", "Hægebostad" ],
+			[ "4227", "Kvinesdal" ],
+			[ "4228", "Sirdal" ],
+			[ "4601", "Bergen" ],
+			[ "4602", "Kinn" ],
+			[ "4611", "Etne" ],
+			[ "4612", "Sveio" ],
+			[ "4613", "Bømlo" ],
+			[ "4614", "Stord" ],
+			[ "4615", "Fitjar" ],
+			[ "4616", "Tysnes" ],
+			[ "4617", "Kvinnherad" ],
+			[ "4618", "Ullensvang" ],
+			[ "4619", "Eidfjord" ],
+			[ "4620", "Ulvik" ],
+			[ "4621", "Voss" ],
+			[ "4622", "Kvam" ],
+			[ "4623", "Samnanger" ],
+			[ "4624", "Bjørnafjorden" ],
+			[ "4625", "Austevoll" ],
+			[ "4626", "Øygarden" ],
+			[ "4627", "Askøy" ],
+			[ "4628", "Vaksdal" ],
+			[ "4629", "Modalen" ],
+			[ "4630", "Osterøy" ],
+			[ "4631", "Alver" ],
+			[ "4632", "Austrheim" ],
+			[ "4633", "Fedje" ],
+			[ "4634", "Masfjorden" ],
+			[ "4635", "Gulen" ],
+			[ "4636", "Solund" ],
+			[ "4637", "Hyllestad" ],
+			[ "4638", "Høyanger" ],
+			[ "4639", "Vik" ],
+			[ "4640", "Sogndal" ],
+			[ "4641", "Aurland" ],
+			[ "4642", "Lærdal" ],
+			[ "4643", "Årdal" ],
+			[ "4644", "Luster" ],
+			[ "4645", "Askvoll" ],
+			[ "4646", "Fjaler" ],
+			[ "4647", "Sunnfjord" ],
+			[ "4648", "Bremanger" ],
+			[ "4649", "Stad" ],
+			[ "4650", "Gloppen" ],
+			[ "4651", "Stryn" ],
+			[ "5001", "Trondheim - Tråante" ],
+			[ "5006", "Steinkjer" ],
+			[ "5007", "Namsos - Nåavmesjenjaelmie" ],
+			[ "5014", "Frøya" ],
+			[ "5020", "Osen" ],
+			[ "5021", "Oppdal" ],
+			[ "5022", "Rennebu" ],
+			[ "5025", "Rosse - Røros" ],
+			[ "5026", "Holtålen" ],
+			[ "5027", "Midtre Gauldal" ],
+			[ "5028", "Melhus" ],
+			[ "5029", "Skaun" ],
+			[ "5031", "Malvik" ],
+			[ "5032", "Selbu" ],
+			[ "5033", "Tydal" ],
+			[ "5034", "Meråker" ],
+			[ "5035", "Stjørdal" ],
+			[ "5036", "Frosta" ],
+			[ "5037", "Levanger" ],
+			[ "5038", "Verdal" ],
+			[ "5041", "Snåase - Snåsa" ],
+			[ "5042", "Lierne" ],
+			[ "5043", "Raarvihke - Røyrvik" ],
+			[ "5044", "Namsskogan" ],
+			[ "5045", "Grong" ],
+			[ "5046", "Høylandet" ],
+			[ "5047", "Overhalla" ],
+			[ "5049", "Flatanger" ],
+			[ "5052", "Leka" ],
+			[ "5053", "Inderøy" ],
+			[ "5054", "Indre Fosen" ],
+			[ "5055", "Heim" ],
+			[ "5056", "Hitra" ],
+			[ "5057", "Ørland" ],
+			[ "5058", "Åfjord" ],
+			[ "5059", "Orkland" ],
+			[ "5060", "Nærøysund" ],
+			[ "5061", "Rindal" ],
+			[ "5501", "Tromsø" ],
+			[ "5503", "Harstad - Hárstták" ],
+			[ "5510", "Kvæfjord" ],
+			[ "5512", "Dielddanuorri - Tjeldsund" ],
+			[ "5514", "Ibestad" ],
+			[ "5516", "Gratangen" ],
+			[ "5518", "Loabák - Lavangen" ],
+			[ "5520", "Bardu" ],
+			[ "5522", "Salangen" ],
+			[ "5524", "Målselv" ],
+			[ "5526", "Sørreisa" ],
+			[ "5528", "Dyrøy" ],
+			[ "5530", "Senja" ],
+			[ "5532", "Balsfjord" ],
+			[ "5534", "Karlsøy" ],
+			[ "5536", "Lyngen" ],
+			[ "5538", "Storfjord - Omasvuotna - Omasvuono" ],
+			[ "5540", "Gáivuotna - Kåfjord - Kaivuono" ],
+			[ "5542", "Skjervøy" ],
+			[ "5544", "Nordreisa - Ráisa - Raisi" ],
+			[ "5546", "Kvænangen" ],
+			[ "5601", "Alta" ],
+			[ "5603", "Hammerfest - Hámmerfeasta" ],
+			[ "5605", "Sør-Varanger" ],
+			[ "5607", "Vadsø" ],
+			[ "5610", "Kárášjohka - Karasjok" ],
+			[ "5612", "Guovdageaidnu - Kautokeino" ],
+			[ "5614", "Loppa" ],
+			[ "5616", "Hasvik" ],
+			[ "5618", "Måsøy" ],
+			[ "5620", "Nordkapp" ],
+			[ "5622", "Porsanger - Porsáŋgu - Porsanki" ],
+			[ "5624", "Lebesby" ],
+			[ "5626", "Gamvik" ],
+			[ "5628", "Deatnu - Tana" ],
+			[ "5630", "Berlevåg" ],
+			[ "5632", "Båtsfjord" ],
+			[ "5634", "Vardø" ],
+			[ "5636", "Unjárga - Nesseby" ]
+		];
+
+		let _MAP,
+			_POPUP,
+			_GEOCODER,
+			_GRAPHS,
+			_LAYERS,
+			_FILTERS;
+		window.addEventListener("load", function() {
+
+			$.ajaxSetup({ timeout: 0 });
+
+			let tooltipTriggerList = [].slice.call(document.querySelectorAll("[data-bs-toggle=\"tooltip\"]"));
+			let tooltipList = tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+
+			// Disable Bootstrap tab keyboard-navigation
+			$("#report_tab button").click(ev => { document.activeElement.blur(); });
+
+			// Disable mobile pinch-zoom
+			document.addEventListener("touchmove", ev => {
+				if(ev.scale !== 1) { ev.preventDefault(); }
+			}, false);
+
+			// Resize funksjon for venstre-panel
+			let leftResize = new CustomResizeObserver({
+				element: "#section",
+				endEvent: () => _MAP.resize(),
+				resizeFunction: () => {
+					let w = $("#section").outerWidth();
+					$("#mapCont").width(`calc(100% - ${w}px)`);
+				}
+			});
+
+			// Resize funksjon for rapport-område (bruker #map for å resize-e)
+			let reportResize = new CustomResizeObserver({
+				element: "#map",
+				endEvent: () => _MAP.resize(),
+				resizeFunction: () => {
+					let h = $("#map").outerHeight();
+					$("#report").height(`calc(100% - ${h}px)`);
+				}
+			});
+
+			// Set up map-button fade-out
+			let btnTimer = null,
+				btnToggle = v => { $(".mapboxgl-ctrl:not(.mapboxgl-ctrl-geocoder)").css("opacity", v || 0); };
+			$("#map").on("mousemove touchmove", function() {
+				btnToggle(1); clearTimeout(btnTimer);
+				btnTimer = setTimeout(btnToggle, 4000);
+			});
+			setTimeout(btnToggle, 4000);
+
+			Highcharts.setOptions({
+				credits: { enabled: false },
+				accessibility: { announceNewData: { enabled: true } },
+				legend: { enabled: false },
+				chart: {
+					/*backgroundColor: {
+						linearGradient: [0, 0, 500, 500],
+						stops: [
+							[0, 'rgb(255, 255, 255)'], [1, 'rgb(240, 240, 255)']
+						]
+					},*/
+					//borderWidth: 1,
+					//borderColor: "grey",
+					plotBackgroundColor: null,
+					plotBorderWidth: null,
+					plotShadow: false
+				},
+				xAxis: {
+					type: "category",
+					gridLineWidth: 1,
+					lineWidth: 0
+				},
+				yAxis: {
+					min: 0,
+					title: { text: "Areal (daa)" },
+					labels: { overflow: "justify" },
+					gridLineWidth: 0
+				},
+				plotOptions: {
+					series: {
+						allowPointSelect: true,
+						cursor: "pointer",
+						borderRadius: 5,
+						dataLabels: [
+							{ enabled: true, distance: 6 }
+						]
+					},
+					pie: {},
+					bar: { groupPadding: 0.1 },
+					sunburst: {
+						dataLabels: {
+							formatter: function() { return this.point.name.slice(0,4); },
+							filter: {
+								property: "innerArcLength", operator: ">", value: 16
+							}
+						}
+					}
+				},
+				drilldown: {
+					activeDataLabelStyle: { textDecoration: "none" },
+					breadcrumbs: { buttonSpacing: 1 }
+				},
+				exporting: {
+					buttons: {
+						contextButton: {
+							menuItems: [ "downloadPNG", "downloadJPEG", "downloadSVG", "downloadPDF", "separator", "downloadCSV", "downloadXLS" ]
+						}
+					},
+					chartOptions: {
+						plotOptions: {
+							series: {
+								dataLabels: { enabled: true }
+							},
+							pie: {
+								dataLabels: {
+									useHTML: true,
+									formatter: function() {
+										let p = this.point;
+										return `${p.name}<br /><span style="font-size:8px;">${p.y.toLocaleString()} daa</span>`;
+									}
+								}
+							}
+						},
+						//subtitle: { text: "" }
+					},
+					//fallbackToExportServer: true
+				}
+			});
+
+			$.extend($.fn.dataTable.defaults, {
+				info: false,
+				paging: false,
+				searching: false,
+				lengthChange: false,
+				autoWidth: false
+			});
+
+			moment.locale("nb");
+
+
+
+			// Outdoors-mute: mapbox://styles/andreasatakan/ckr3zunbt18f517pewgf0ewaa
+			// Satellite: mapbox://styles/andreasatakan/clhf9cjsu019f01qygzstdcee
+			let curr_style = "mapbox://styles/andreasatakan/clhf9cjsu019f01qygzstdcee";
+
+			mapboxgl.accessToken = "pk.eyJ1IjoiYW5kcmVhc2F0YWthbiIsImEiOiJjbGhmOWJwY2YxbnV6M2xwYzZ2NW9jYTRtIn0.okXO5qA-OcCpQbGRZuHv6w";
+			_MAP = new mapboxgl.Map({
+				container: "map",
+				style: curr_style,
+				//projection: "mercator",
+				center: [ 12.81885324762095, 65.2870238834735 ],
+				zoom: 3.6,
+				maxPitch: 60,
+				maxBounds: mapBounds,
+				customAttribution: "Laget med <a href=\"https://geotales.io/\" target=\"_blank\">GeoTales</a>",
+				logoPosition: "bottom-right",
+				keyboard: false,
+				language: "no"
+			});
+			_POPUP = new mapboxgl.Popup({
+				anchor: "bottom",
+				maxWidth: "none",
+				focusAfterOpen: false
+			});
+
+			mapRegisterControlPosition(_MAP, "bottom-center");
+
+			kommuner.forEach(k =>
+				$("datalist#kommuner").append(`<option value="${k[0]}">(${k[0]}) ${k[1]}</option>`)
+			);
+
+
+
+			_GRAPHS = {};
+
+			_LAYERS = [
+				{ id: "utbyggingspotensiale",	layer: "Utbyggingspotensiale",	color: "#E6E600" },
+				{ id: "aapen_fastmark",			layer: "Åpen fastmark",			color: "#A3A375" },
+				{ id: "myr",					layer: "Myr",					color: "#7575A3" },
+				{ id: "skog",					layer: "Skog",					color: "#669900" },
+				{ id: "jordbruk",				layer: "Jordbruk",				color: "#CC9900" },
+				{ id: "kulturlandskap",			layer: "Kulturlandskap",		color: "#CC6600" },
+				{ id: "strandsone",				layer: "Strandsone",			color: "#CC3300" },
+				{ id: "skredfaresone",			layer: "Skredfaresone",			color: "#E60000" },
+				{ id: "flomsone",				layer: "Flomsone",				color: "#0066CC" },
+				{ id: "villrein",				layer: "Villrein",				color: "#BF4080" }
+			];
+
+			_FILTERS = {
+				"gardsnummer":		[ "==", [ "get", "gardsnummer" ], 0 ],
+				"bruksnummer":		[ "==", [ "get", "bruksnummer" ], 0 ],
+				//"festenummer":	[ "==", [ "get", "festenummer" ], 0 ],
+				//"seksjonsnummer":	[ "==", [ "get", "seksjonsnummer" ], 0 ],
+				"kommunenummer":	[ "==", [ "get", "kommunenummer" ], "" ]
+			};
+			function setFilter(filters) {
+				//
+				if(filters) {
+					for(let f in filters) {
+						if(_FILTERS[f]) { _FILTERS[f][2] = filters[f]; }
+					}
+				}
+
+				let filter = [
+					"all",
+					_FILTERS["gardsnummer"],
+					_FILTERS["bruksnummer"],
+					//_FILTERS["festenummer"],
+					//_FILTERS["seksjonsnummer"],
+					_FILTERS["kommunenummer"]
+				];
+
+				//_MAP.setFilter("eiendomsgrense_teig", filter);
+				//_MAP.setFilter("eiendomsgrense", filter);
+				_MAP.setPaintProperty("eiendomsgrense", "line-color",
+					[
+						"case",
+						filter, "#ff0000",
+						"#b3b3b3"
+					]
+				);
+
+				for(let l of _LAYERS) {
+					let f = [
+						...filter,
+						[ "==", [ "get", "overlapp_type" ], l.layer ]
+					];
+
+					if(l.id == "utbyggingspotensiale"
+					&& filters && filters["reguleringsnivå"]) {
+						f.push( [ "in", [ "get", "planreserve_reguleringsnivå" ], [ "literal", filters["reguleringsnivå"] ] ] );
+					}
+
+					if(l.id == "skog"
+					&& filters && filters["skogbonitet"]) {
+						f.push( [ "in", [ "get", "ar5_skogbonitet" ], [ "literal", filters["skogbonitet"] ] ] );
+					}
+					if(l.id == "jordbruk"
+					&& filters && filters["jordbruk"]) {
+						f.push( [ "in", [ "get", "ar5_jordbruk" ], [ "literal", filters["jordbruk"] ] ] );
+					}
+
+					_MAP.setFilter(l.id, f);
+				}
+			}
+
+			function disableMap() {
+				_MAP.scrollZoom.disable();
+				_MAP.boxZoom.disable();
+				_MAP.dragRotate.disable();
+				_MAP.dragPan.disable();
+				_MAP.keyboard.disable();
+				_MAP.doubleClickZoom.disable();
+				_MAP.touchZoomRotate.disable();
+			}
+			function enableMap() {
+				_MAP.scrollZoom.enable();
+				_MAP.boxZoom.enable();
+				_MAP.dragRotate.enable();
+				_MAP.dragPan.enable();
+				_MAP.keyboard.enable();
+				_MAP.doubleClickZoom.enable();
+				_MAP.touchZoomRotate.enable();
+			}
+
+			let format_area = n => formatDecimal(n, 1);
+
+			async function initDashboard(point) {
+				//
+				$(`#report #dashboard,
+				   #report #balance`).html(`
+					<div class="mx-3 my-2">
+						<div role="status" class="spinner-border spinner-border-sm"></div>
+						<p class="d-inline text-muted">Laster inn...</p>
+					</div>
+				`);
+
+				let data;
+				try {
+					await new Promise((resolve, reject) => {
+						//_MAP.once("idle", ev => { resolve(); });
+						_MAP.on("data", ev => {
+							if(ev.sourceId != "eiendomsgrense_teig") { return; }
+
+							let features = _MAP.queryRenderedFeatures(
+								_MAP.project(point),
+								{ layers: [ "eiendomsgrense_teig" ] }
+							);
+							if(features.length <= 0) { return; }
+
+							data = features[0].properties;
+
+							_MAP.off("data"); bindMapEv();
+							resolve();
+						});
+
+						setTimeout(() => { reject(); }, 3*60*1000);
+					});
+				}
+				catch(err) {
+					$(`#report #dashboard,
+					   #report #balance`).html(`
+						<p class="text-muted mx-3 my-2">
+							<strong>Feil;</strong> Timeout, forespørselen tok for lang tid eller gav ingen svar
+							<button type="button" class="btn btn-sm btn-outline-secondary rounded ms-1" id="try_again"><i class="fa-solid fa-rotate-right"></i></button>
+						</p>
+					`);
+					$("#report #balance #try_again").click(ev => { initDashboard(point); });
+					return;
+				}
+				console.log(data);
+
+				//
+				$("#report #dashboard").html(`
+					<div class="graph" id="teig_info" style="overflow-y: auto;"></div>
+					<div class="graph" id="arealtyper_pie"></div>
+					<div class="graph sub" id="utbyggingspotensiale_bar"></div>
+					<div class="graph sub" id="skog_bar"></div>
+					<div class="graph sub" id="jordbruk_bar"></div>
+				`);
+
+				//
+				$("#report #dashboard #teig_info").html(`
+					<p class="lead text-muted mx-2 my-2">Teig-info</p>
+					<dl class="row m-0 small">
+						${Object.keys(_FELT_TEIG).map(e => {
+							let f = _FELT_TEIG[e],
+								v = data[e];
+
+							if(["datauttaksdato", "oppdateringsdato"].indexOf(e) > -1) {
+								v = moment(v, "YYYYMMDD").format("DD MMM YYYY");
+							}
+							if(typeof v == "boolean") { v = v ? "Ja" : "Nei"; }
+
+							return `<dt class="col-sm-7">${f}</dt> <dd class="col-sm-5">${v}</dd>`;
+						}).join("")}
+					</dl>
+				`);
+
+				//
+				let felt = Object.keys(_FELT_TEIG_AREAL).filter(e => data[e] > 0);
+				_GRAPHS["arealtyper_pie"] = Highcharts.chart("arealtyper_pie", {
+					chart: { type: "pie" },
+					title: { text: "Arealer innenfor eiendommen", align: "left" },
+					subtitle: {
+						text: "Trykk på seksjonene for å se underkategorier",
+						align: "left"
+					},
+					tooltip: { valueSuffix: " daa" },
+					exporting: { chartOptions: { subtitle: { text: "" } } },
+					series: [
+						{
+							name: "Areal",
+							data: felt.map(e => ({ name: _FELT_TEIG_AREAL[e], y: format_area(data[e] / 1000), drilldown: e }))
+						}
+					],
+					drilldown: {
+						series: Object.keys(_FELT_TEIG_AREAL_sub).map(e => ({
+							id: e,
+							name: e,
+							data: Object.keys(_FELT_TEIG_AREAL_sub[e])
+								  .filter(d => data[d] > 0)
+								  .map(d => ({
+									name: _FELT_TEIG_AREAL_sub[e][d],
+									y: format_area(data[d] / 1000),
+									color: _MATRIKKEL_COLORS[e]
+								  }))
+						}))
+					},
+					colors: felt.map(e => _MATRIKKEL_COLORS[e])
+				});
+
+				//
+				felt = Object.keys(_FELT_TEIG_AREAL_sub["utbyggingspotensiale_m2"]);
+				_GRAPHS["utbyggingspotensiale_bar"] = Highcharts.chart("utbyggingspotensiale_bar", {
+					chart: { type: "bar" },
+					title: { text: "Reguleringsnivå", align: "left" },
+					tooltip: { valueSuffix: " daa" },
+					plotOptions: { series: { allowPointSelect: false } },
+					legend: { enabled: false },
+					series: [
+						{ name: "Areal", data: felt.map(e => [ _FELT_TEIG_AREAL_sub["utbyggingspotensiale_m2"][e], format_area(data[e] / 1000) ]) }
+					],
+					colors: felt.map(e => _MATRIKKEL_COLORS["utbyggingspotensiale_m2"])
+				});
+
+				//
+				felt = Object.keys(_FELT_TEIG_AREAL_sub["skog_m2"]);
+				_GRAPHS["skog_bar"] = Highcharts.chart("skog_bar", {
+					chart: { type: "bar" },
+					title: { text: "Skogressurser", align: "left" },
+					tooltip: { valueSuffix: " daa" },
+					plotOptions: { series: { allowPointSelect: false } },
+					legend: { enabled: false },
+					series: [
+						{ name: "Areal", data: felt.map(e => [ _FELT_TEIG_AREAL_sub["skog_m2"][e], format_area(data[e] / 1000) ]) }
+					],
+					colors: felt.map(e => _MATRIKKEL_COLORS["skog_m2"])
+				});
+
+				//
+				felt = Object.keys(_FELT_TEIG_AREAL_sub["jordbruk_m2"]);
+				_GRAPHS["jordbruk_bar"] = Highcharts.chart("jordbruk_bar", {
+					chart: { type: "bar" },
+					title: { text: "Jordbruksarealer", align: "left" },
+					tooltip: { valueSuffix: " daa" },
+					plotOptions: { series: { allowPointSelect: false } },
+					legend: { enabled: false },
+					series: [
+						{ name: "Areal", data: felt.map(e => [ _FELT_TEIG_AREAL_sub["jordbruk_m2"][e], format_area(data[e] / 1000) ]) }
+					],
+					colors: felt.map(e => _MATRIKKEL_COLORS["jordbruk_m2"])
+				});
+
+
+				//
+				$("#report #balance").html(`
+					<h5 class="mx-3 my-2">Arealer innenfor utbyggingspotensiale</h5>
+					<p class="text-muted small mx-3 mb-0">Alle tall i dekar</p>
+					<table class="table table-striped small" id="balance_table">
+						<thead>
+							<tr>
+								<th scope="col">&nbsp;</th>
+								<th scope="col">Areal (daa)</th>
+							</tr>
+						</thead>
+						<tbody class="table-group-divider"></tbody>
+					</table>
+				`);
+
+				//data = groupArrayMany(plandata.filter(e => e.planlegging_status == "Tidligere plan"), "arealformaalsbeskrivelse", ["myr_m2", "skog_m2", "jordbruk_m2", "aapen_fastmark_m2", "kulturlandskap_m2", "skredfaresone_m2", "flomsone_m2", "over_skoggrense_m2", "strandsone_m2", "villrein_m2", "iba_m2", "planlagt_m2"]);
+				//let data_all = groupArrayMany(plandata, "arealformaalsbeskrivelse", ["myr_m2", "skog_m2", "jordbruk_m2", "aapen_fastmark_m2", "kulturlandskap_m2", "skredfaresone_m2", "flomsone_m2", "over_skoggrense_m2", "strandsone_m2", "villrein_m2", "iba_m2", "planlagt_m2"]);
+				//let fp = Object.keys(data)[0];
+				felt = Object.keys(_FELT_TEIG_AREAL).slice(1);
+				for(let r of felt) {
+					$("#balance_table tbody").append(`
+						<tr>
+							<th scope="row">${_FELT_TEIG_AREAL[r]}</th>
+							<td>&nbsp;</td>
+						</tr>
+					`);
+					/*${Object.keys(data[r]).map(p => `
+						<td>${ format_area(data[r][p] / 1000) }</td>
+					`)}*/
+				}
+
+				//
+			}
+
+			const removeSource = id => _MAP.getSource(id) && _MAP.removeSource(id);
+			const removeLayer = id => _MAP.getLayer(id) && _MAP.removeLayer(id);
+			const remove = id => { removeLayer(id); removeSource(id); };
+			function loadData() {
+				//
+				let minzoom = 10;
+
+				remove("eiendomsgrense");
+				_MAP.addSource("eiendomsgrense", {
+					"type": "vector",
+					"url": _GetTile("teig_grense")
+				});
+				_MAP.addLayer({
+					"id": "eiendomsgrense",
+					"type": "line",
+					"source": "eiendomsgrense",
+					"source-layer": "teig_grense",
+					"minzoom": minzoom,
+					"paint": {
+						"line-color": "#ff0000",
+						"line-opacity": 1,
+						"line-width": 2
+					}
+				});
+
+				removeSource("eiendomsgrense_overlapp");
+				_MAP.addSource("eiendomsgrense_overlapp", {
+					"type": "vector",
+					"url": _GetTile("teig_overlapp")
+				});
+				for(let l of _LAYERS) {
+					removeLayer(l.id);
+					_MAP.addLayer({
+						"id": l.id,
+						"type": "fill",
+						"source": "eiendomsgrense_overlapp",
+						"source-layer": "teig_overlapp",
+						"minzoom": minzoom,
+						"filter": [
+							"all",
+							_FILTERS["gardsnummer"],
+							_FILTERS["bruksnummer"],
+							_FILTERS["kommunenummer"],
+							[ "==", [ "get", "overlapp_type" ], l.layer ]
+						],
+						"paint": {
+							"fill-color": l.color,
+							"fill-opacity": 0.8,
+							"fill-outline-color": "#b3b3b3"
+						},
+						"layout": {
+							"visibility": $(`#section input#${l.id}`)[0].checked ?
+											"visible" :
+											"none"
+						}
+					});
+				}
+
+				remove("eiendomsgrense_teig");
+				_MAP.addSource("eiendomsgrense_teig", {
+					"type": "vector",
+					"url": _GetTile("teig")
+				});
+				_MAP.addLayer({
+					"id": "eiendomsgrense_teig",
+					"type": "fill",
+					"source": "eiendomsgrense_teig",
+					"source-layer": "teig",
+					"minzoom": minzoom,
+					"paint": {
+						"fill-color": "rgba(0,0,0,0)",
+						"fill-opacity": 0
+					}
+				});
+
+				//setFilter();
+			}
+
+
+
+			_MAP.addControl(new mapboxgl.NavigationControl());
+			_MAP.addControl(new mapboxgl.FullscreenControl({
+				container: $("main")[0]
+			}));
+			_MAP.addControl(new mapboxgl.ScaleControl({
+				maxWidth: 80
+			}), "bottom-right");
+			_GEOCODER = new MapboxGeocoder({
+				accessToken: mapboxgl.accessToken,
+				mapboxgl: mapboxgl,
+				countries: "no",
+				bbox: mapBounds.flat(),
+				zoom: 17,
+				placeholder: "Søk opp din adresse",
+				marker: false,
+				flyTo: false
+			});
+			_MAP.addControl(_GEOCODER, "top-left");
+
+			let leftpanelOpen = true;
+			_MAP.addControl(new CustomBtn({
+				className: "custom-left-panel-toggle",
+				title: "Skjul venstre pannel",
+				icon: "bars",
+				eventHandler: ev => {
+					let btn = $(".custom-left-panel-toggle button");
+
+					if(leftpanelOpen) {
+						// hide
+						$("#section").hide();
+						$("#mapCont").addClass("w-100");
+						btn.prop("title", "Vis venstre pannel");
+					}
+					else {
+						// show
+						$("#section").show();
+						$("#mapCont").removeClass("w-100");
+						btn.prop("title", "Skjul venstre pannel");
+					}
+
+					_MAP.resize();
+					leftpanelOpen = !leftpanelOpen;
+				}
+			}), "top-left");
+
+			let reportOpen = false;
+			_MAP.addControl(new CustomBtn({
+				className: "custom-report-toggle px-2 py-1",
+				title: "Åpne rapport panel",
+				icon: "chevron-up",
+				eventHandler: ev => {
+					let btn = $(".custom-report-toggle button"),
+						i = $(".custom-report-toggle i");
+
+					if(reportOpen) {
+						// hide
+						i.removeClass("fa-chevron-down");
+						i.addClass("fa-chevron-up");
+						btn.prop("title", "Åpne rapport panel");
+
+						$("#map").addClass("h-100");
+						$("#report").addClass("h-0");
+						//$("#map::after").css("display", "none");
+						$("#map").css({ "resize": "none", "max-height": "none" });
+					}
+					else{
+						// show
+						i.removeClass("fa-chevron-up");
+						i.addClass("fa-chevron-down");
+						btn.prop("title", "Lukk rapport panel");
+
+						$("#map, #report").removeClass("h-100 h-0");
+						$("#map, #report").height("50%");
+						//$("#map::after").css("display", "block");
+						$("#map").css({ "resize": "vertical", "max-height": "75%" });
+
+						//if(_GRAPHS["search_table"]) { _GRAPHS["search_table"].draw(); }
+					}
+
+					_MAP.resize();
+					reportOpen = !reportOpen;
+				}
+			}), "bottom-left");
+
+			const setStyle = style => {
+				if(style != curr_style) { _MAP.setStyle(style); curr_style = style; }
+			};
+			/*_MAP.addControl(new CustomBtn({
+				title: "Bytt til basis kart",
+				icon: "map",
+				eventHandler: ev => setStyle("mapbox://styles/andreasatakan/ckr3zunbt18f517pewgf0ewaa")
+			}), "bottom-left");
+			_MAP.addControl(new CustomBtn({
+				className: "custom-map-control",
+				title: "Bytt til satellitt kart",
+				icon: "earth-europe",
+				eventHandler: ev => setStyle("mapbox://styles/andreasatakan/clhf9cjsu019f01qygzstdcee")
+			}), "bottom-left");*/
+
+
+			/*let layers_shown = [];
+			_MAP.addControl(new CustomBtn({
+				className: "custom-layer-toggle",
+				title: "Hide maplayers",
+				icon: "eye-slash",
+				eventHandler: ev => {
+					let btn = $(".custom-layer-toggle button"),
+						i = $(".custom-layer-toggle i");
+
+					if(layers_shown.length <= 0) {
+						// hide
+						i.removeClass("fa-eye-slash");
+						i.addClass("fa-eye");
+						btn.prop("title", "Show maplayers");
+
+						let ls = _MAP.getStyle().layers.filter(l => l.source && l.source != "composite" && l.id != "satellite");
+						for(let l of ls) {
+							let v = _MAP.getLayoutProperty(l.id, "visibility");
+							if(v == "visible") { layers_shown.push(l.id); }
+							_MAP.setLayoutProperty(l.id, "visibility", "none");
+						}
+
+						$(`#section select,
+						   #section input[type="checkbox"]`).prop("disabled", true);
+					}
+					else{
+						// show
+						i.removeClass("fa-eye");
+						i.addClass("fa-eye-slash");
+						btn.prop("title", "Hide maplayers");
+
+						for(let id of layers_shown) {
+							_MAP.setLayoutProperty(id, "visibility", "visible");
+						}
+						layers_shown = [];
+
+						$(`#section select,
+						   #section input[type="checkbox"]`).prop("disabled", false);
+					}
+				}
+			}), "bottom-right");
+			$(".custom-layer-toggle button").prop("disabled", true);*/
+
+
+			let report_fullscreen = false;
+			$("#report #report_fullscreen").click(ev => {
+				if(report_fullscreen) {
+					// exit fullscreen
+					$("#map").removeClass("h-0");
+					$("#report").removeClass("h-100");
+
+					$("#report #report_fullscreen i").removeClass("fa-chevron-down");
+					$("#report #report_fullscreen i").addClass("fa-chevron-up");
+
+					_MAP.resize();
+				}
+				else {
+					// enter fullscreen
+					$("#map").addClass("h-0");
+					$("#report").addClass("h-100");
+
+					$("#report #report_fullscreen i").removeClass("fa-chevron-up");
+					$("#report #report_fullscreen i").addClass("fa-chevron-down");
+				}
+
+				report_fullscreen = !report_fullscreen;
+			});
+
+
+
+			async function setTeig(point, filters, callback) {
+				for(l of _LAYERS) { _MAP.setLayoutProperty(l.id, "visibility", "none"); }
+				$(`#section input[type="checkbox"]`).prop("checked", false);
+
+				let f = filters, err;
+				if(!f) {
+					try {
+						await new Promise((resolve, reject) => {
+							$.ajax({
+								type: "GET",
+								url: "https://api.kartverket.no/eiendom/v1/punkt",
+								data: { "ost": point[0], "nord": point[1], "koordsys": 4258, "radius": 10, "utkoordsys": 4258, "treffPerSide": 10, "side": 1 },
+								dataType: "json",
+								success: function(result, status, xhr) {
+									let r = result.eiendom[0];
+									f = { "gardsnummer": r.gardsnummer, "bruksnummer": r.bruksnummer, "kommunenummer": r.kommunenummer };
+									resolve();
+								},
+								error: function(xhr, status, error) { err = error; reject(); }
+							});
+						});
+					}
+					catch(err) {
+						setTimeout(() => {
+							$("#loadingModal").modal("hide");
+							$("#errorModal #errorCode").html(err);
+							$("#errorModal").modal("show");
+						}, 500);
+						return;
+					}
+				}
+
+				setFilter(f);
+				initDashboard(point);
+
+				//_MAP.triggerRepaint(); //_MAP.resize();
+				$(`#section input[type="checkbox"],
+				   .custom-layer-toggle button`).prop("disabled", false);
+
+				callback();
+			}
+
+
+
+			function bindMapEv() {
+				_MAP.on("data", ev => {
+					if(!ev.isSourceLoaded) { return; }
+
+					let s = ev.sourceId, el;
+					if(s == "eiendomsgrense") { e = "#eiendomsgrense_loading"; }
+					else
+					if(s == "eiendomsgrense_overlapp") { el = "#overlapp_loading"; }
+
+					$(el).css("display", "none");
+				});
+			}
+
+			_MAP.on("style.load", () => {
+				loadData();
+			});
+
+			_MAP.on("load", () => {
+
+				bindMapEv();
+
+				/*$("#section select#arealreserve").change(ev => {
+					let field = $(ev.target).val();
+					let fill = _PLAN_COLORS[ field ],
+						f = ["arealstatus"].indexOf(field) > -1 && false;
+
+					["plandata_gjeld", "plandata_frem"].forEach(l => {
+						_MAP.setPaintProperty(l, "fill-color", 
+							[
+								"match", ["get", field],
+								...Object.keys(fill)
+									.map(e => [ f ? parseInt(e) : e, fill[e] ])
+									.flat(),
+								"#FEFEFE" // otherwise
+							]
+						);
+					});
+
+					let cont = "";
+					for(let f in fill) {
+						if(["Nyere enn 2008", "Kommuneplan (delplan)", "KpArealformålOmråde", "KpArealbrukOmråde", "RpArealformålOmråde", "RbFormålOmråde"].indexOf(f) > -1
+						|| f === "0" || +f) { continue; }
+						cont += `<span class="color-preview" style="background-color: ${fill[f]};"></span> ${f} <br />`;
+					}
+					$("#arealreserveColors").html(cont);
+				});*/
+
+				_LAYERS
+				.forEach(_l => {
+					let l = _l.id, layer = _l.layer;
+					$(`#section input#${l}`).change(ev => {
+						let checked = ev.target.checked;
+
+						_MAP.setLayoutProperty(l, "visibility",
+							checked ? "visible" : "none"
+						);
+						$("#overlapp_loading").css("display",
+							checked ? "inline-block" : "none"
+						);
+
+						$(`#section input[data-parentlayer="${l}"]`).parent().toggle(checked);
+						$(`#section input[data-parentlayer="${l}"]`).prop("checked", checked);
+						setFilter({
+							"skogbonitet": null,
+							"jordbruk": null
+						});
+					});
+
+					$(`#section input[data-parentlayer="${l}"]`).parent().hide();
+					$(`#section input[data-parentlayer="${l}"]`).change(ev => {
+						let v = $(`#section input[data-parentlayer="${l}"]:checked`).map((i, e) => $(e).val()).toArray(),
+							f;
+
+						if(l == "utbyggingspotensiale") { f = { "reguleringsnivå": v.map(e => parseInt(e)) }; }
+						if(l == "skog") { f = { "skogbonitet": v }; }
+						if(l == "jordbruk") { f = { "jordbruk": v }; }
+						if(!f) { return; }
+
+						setFilter(f);
+					});
+				});
+
+				let layer_active = false;
+				_LAYERS.map(l => l.id)
+				.forEach(l => 
+					_MAP.on("click", l, ev => {
+						ev.layer_click = true; layer_active = true;
+						if( _POPUP.isOpen() ) { return; }
+
+						let latlng = ev.lngLat,
+							props = ev.props || ev.features[0].properties,
+							felt = _FELT_MATRIKKEL[l];
+
+						let cont = "";
+						for(let p in felt) {
+							let v = props[p];
+							if(!v && v != 0) { continue; }
+
+							if(p == "ar5_treslag")		{ v = ar5_treslag[v]; }
+							if(p == "ar5_skogbonitet")	{ v = ar5_skogbonitet[v]; }
+							if(p == "ar5_grunnforhold")	{ v = ar5_grunnforhold[v]; }
+							if(p == "ar5_jordbruk")		{ v = ar5_jordbruk[v]; }
+
+							if(p == "planreserve_reguleringsnivå")		{ v = planreserve_reguleringsnivå[v]; }
+							if(p == "planreserve_ikrafttredelsesdato")	{ v = moment(v, "YYYYMMDD").format("DD MMM YYYY"); }
+							cont += `<tr><th>${felt[p]}</th> <td>${v}</td></tr>`;
+						}
+
+						_POPUP
+							.setLngLat(latlng)
+							.setHTML(`<table style="width:100%;">${cont}</table>`)
+							.addTo(_MAP);
+
+						_MAP.setPaintProperty(l, "fill-outline-color",
+							[
+								"match", [ "get", "id" ],
+								props.id, "#cc0000",
+								"#b3b3b3"
+							]
+						);
+					})
+				);
+
+				_MAP.on("click", "eiendomsgrense_teig", ev => {
+					if(layer_active) { return; }
+					$("#loadingModal").modal("show");
+					setTeig([ev.lngLat.lng, ev.lngLat.lat], null, () => {
+						setTimeout(() => { $("#loadingModal").modal("hide"); }, 500);
+					});
+				});
+
+				_MAP.on("click", ev => {
+					if(ev.layer_click) { return; }
+					_LAYERS.map(l => l.id).forEach( l => _MAP.setPaintProperty(l, "fill-outline-color", "#b3b3b3") );
+					layer_active = false;
+				});
+
+				//_POPUP.on("close", ev => {});
+
+
+
+				let search_callback = async () => {
+						try {
+							await new Promise((resolve, reject) => {
+								_MAP.on("data", ev => {
+									if(ev.sourceId != "eiendomsgrense") { return; }
+									_MAP.off("data"); resolve();
+								});
+
+								setTimeout(() => { reject(); }, 0.5*60*1000);
+							});
+						}
+						catch(err) {
+							//$("#errorModal #errorCode").html("Timeout; eiendomsgrense lastet ikke inn");
+							//$("#errorModal").modal("show");
+						}
+
+						setTimeout(() => { $("#loadingModal").modal("hide"); }, 500);
+					};
+				_GEOCODER.on("result", ev => {
+					let p = ev.result.center;
+
+					$("#loadingModal").modal("show");
+					//$("#eiendomsgrense_loading").css("display", "inline-block");
+
+					_MAP.jumpTo({ center: p, zoom: 17 });
+
+					setTeig(p, null, search_callback);
+				});
+
+
+
+				$("#report #table form").submit(async ev => {
+					ev.preventDefault();
+
+					let data = { "op": "matrikkel_search" };
+					(new FormData(ev.target)).forEach((v, k) => { data[k] = v; });
+
+					$("#loadingModal").modal("show");
+
+					let res, err;
+					try {
+						await new Promise((resolve, reject) => {
+							$.ajax({
+								type: "GET",
+								url: "api.php",
+								data: data,
+								dataType: "json",
+								success: function(result, status, xhr) { res = result; resolve(); },
+								error: function(xhr, status, error) { err = error; reject(); }
+							});
+						});
+					}
+					catch(err) {
+						setTimeout(() => {
+							$("#loadingModal").modal("hide");
+							$("#errorModal #errorCode").html(err);
+							$("#errorModal").modal("show");
+						}, 500);
+						return;
+					}
+					res = res.map(e => {
+						let r = e; r.representasjonspunkt = JSON.parse(r.representasjonspunkt).coordinates; return r;
+					});
+
+					setTimeout(() => { $("#loadingModal").modal("hide"); }, 500);
+
+
+					if(_GRAPHS["search_table"]) { _GRAPHS["search_table"].destroy(); } // For å unngå feilmelding
+					$("#report #table #search_results").html(`
+						<button type="button" class="btn btn-sm btn-link" id="toggle_columns">Vis alle</button>
+						<table class="table table-hover" id="search_table">
+							<thead></thead>
+							<tbody></tbody>
+						</table>
+					`);
+
+					let felt = Object.keys(_FELT_TEIG_SEARCH);
+					$("#search_table thead").html(`
+						<tr>${ felt.map(p => `<th>${ _FELT_TEIG_SEARCH[p].text }</th>`).join("") }</tr>
+					`);
+					for(let f of res) {
+						$("#search_table tbody").append(`
+							<tr>
+								${felt.map(p => {
+									let v = f[p];
+									if(p.includes("_m2")) { v = format_area(v / 1000); }
+									return `<td>${v}</td>`;
+								}).join("")}
+							</tr>
+						`);
+					}
+
+					_GRAPHS["search_table"] = new DataTable("#search_table", {
+						paging: false,
+						searching: false,
+						//scrollX: true,
+						//scrollY: "calc(50vh - 175.2px)",
+						//scroller: true,
+						//scrollResize: true,
+						//scrollCollapse: true
+						columnDefs: felt.map((e,i) => ({ target: i, visible: _FELT_TEIG_SEARCH[e].default }))
+					});
+					$("button[data-bs-toggle=\"tab\"]").on("shown.bs.tab", ev => { if(_GRAPHS["search_table"]) { _GRAPHS["search_table"].draw(); } });
+
+					let columns_shown = false;
+					$("#search_results #toggle_columns").click(ev => {
+						felt.slice(1).map((e,i) => {
+							_GRAPHS["search_table"].column(i+1).visible(
+								columns_shown ? _FELT_TEIG_SEARCH[e].default : true
+							);
+						});
+						$(ev.target).html(columns_shown ? "Vis alle" : "Skjul");
+						columns_shown = !columns_shown;
+					});
+
+					$("#search_table tbody tr").click(ev => {
+						let d = _GRAPHS["search_table"].row( $(ev.target) ).data();
+						let v = f => d[ Object.keys(_FELT_TEIG_SEARCH).indexOf(f) ];
+
+						let p = v("representasjonspunkt").split(",").map(e => parseFloat(e)),
+							f = {
+								"gardsnummer": parseInt(v("gardsnummer")),
+								"bruksnummer": parseInt(v("bruksnummer")),
+								//"festenummer": parseInt(v("")),
+								//"seksjonsnummer": parseInt(v("")),
+								"kommunenummer": v("kommunenummer")
+							};
+
+						_MAP.jumpTo({ center: p, zoom: 17 });
+
+						setTeig(p, f, search_callback);
+					});
+				});
+			});
+
+
+
+			//
+
+		});
+
+	</script>
+
+</body>
+</html>

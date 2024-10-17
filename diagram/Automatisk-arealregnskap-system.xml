@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="Electron" modified="2023-05-26T22:54:03.550Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/14.6.13 Chrome/89.0.4389.128 Electron/12.0.7 Safari/537.36" etag="ziDc5qnws4QNZE4F6x3E" version="14.6.13" type="device">
+  <diagram id="E45YD42mWuuE73yOpaC2" name="Page-1">
+    <mxGraphModel dx="868" dy="519" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="tHV19I81ividYjsWDeat-1" value="" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" parent="1" vertex="1">
+          <mxGeometry x="40" y="140" width="40" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="tHV19I81ividYjsWDeat-2" value="Automatisk GIS analyse" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+          <mxGeometry x="300" y="130" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="tHV19I81ividYjsWDeat-3" value="" style="endArrow=classic;html=1;" parent="1" source="tHV19I81ividYjsWDeat-1" target="tHV19I81ividYjsWDeat-2" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="260" as="sourcePoint" />
+            <mxPoint x="440" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tHV19I81ividYjsWDeat-4" value="Laster opp plan til vurdering" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="tHV19I81ividYjsWDeat-3" vertex="1" connectable="0">
+          <mxGeometry x="-0.3554" relative="1" as="geometry">
+            <mxPoint x="26" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tHV19I81ividYjsWDeat-5" value="PDF-rapport av analyseresultater" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="600" y="140" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="tHV19I81ividYjsWDeat-6" value="Interaktivt web-kart som fremstiller resultatene" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="600" y="210" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="tHV19I81ividYjsWDeat-7" value="WMS-tjeneste som viser resultatene" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="600" y="280" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="tHV19I81ividYjsWDeat-8" value="" style="endArrow=classic;html=1;edgeStyle=orthogonalEdgeStyle;" parent="1" source="tHV19I81ividYjsWDeat-2" target="tHV19I81ividYjsWDeat-6" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="550" y="230" as="sourcePoint" />
+            <mxPoint x="600" y="180" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="550" y="170" />
+              <mxPoint x="550" y="240" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tHV19I81ividYjsWDeat-9" value="" style="endArrow=classic;html=1;" parent="1" source="tHV19I81ividYjsWDeat-2" target="tHV19I81ividYjsWDeat-5" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="550" y="230" as="sourcePoint" />
+            <mxPoint x="600" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tHV19I81ividYjsWDeat-10" value="" style="endArrow=classic;html=1;edgeStyle=orthogonalEdgeStyle;" parent="1" source="tHV19I81ividYjsWDeat-2" target="tHV19I81ividYjsWDeat-7" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="550" y="230" as="sourcePoint" />
+            <mxPoint x="600" y="180" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="550" y="170" />
+              <mxPoint x="550" y="310" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tHV19I81ividYjsWDeat-11" value="Nedlasting av analyseresutlatene i vektor-format (f.eks. Shape)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="600" y="350" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="tHV19I81ividYjsWDeat-12" value="" style="endArrow=classic;html=1;edgeStyle=orthogonalEdgeStyle;" parent="1" source="tHV19I81ividYjsWDeat-2" target="tHV19I81ividYjsWDeat-11" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="550" y="180" as="sourcePoint" />
+            <mxPoint x="600" y="130" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="550" y="170" />
+              <mxPoint x="550" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tHV19I81ividYjsWDeat-14" value="Tidligere planer" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;arcSize=50;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+          <mxGeometry x="340" y="10" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="tHV19I81ividYjsWDeat-15" value="" style="endArrow=classic;html=1;" parent="1" source="tHV19I81ividYjsWDeat-14" target="tHV19I81ividYjsWDeat-2" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="250" as="sourcePoint" />
+            <mxPoint x="440" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
