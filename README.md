@@ -1,6 +1,9 @@
 # ARV
 ==============================
 
+This repository contains the source-code for the GeoTales area-accounting system ARV (Arealregnskap med visualisering).
+
+
 ##### Arbeidslogg
 
 X <u>28.feb 2024</u>
