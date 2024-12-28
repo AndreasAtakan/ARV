@@ -1,33 +1,108 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 
-# dependencies
-node_modules
+
+### Linux ###
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+
+### Node ###
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+build/Release
+node_modules/
+jspm_packages/
+.npm
+.node_repl_history
+.yarn-integrity
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
 .cache
+.parcel-cache
+dist
+build
+.cache/
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
 package-lock.json
-composer.lock
-vendor/
+coverage/
 
-# testing
-*/coverage
 
-# production
-dist/
-build/
+### OSX ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
 
-# misc
-*/.DS_Store
-*/.env
-*/.env.local
-*/.env.development.local
-*/.env.test.local
-*/.env.production.local
 
+### Python ###
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+develop-eggs/
+eggs/
+.eggs/
+*.egg-info/
+*.egg
+MANIFEST
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+*.py,cover
+.pytest_cache/
+cover/
+__pypackages__/
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+
+### SAM ###
+**/.aws-sam
+
+
+### Windows ###
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+
+### MISC ###
 temp/
 temp.*
 
-data*/
-_data/
-_files/
 etc/
-
-BBREG_enheter_alle.xlsx
