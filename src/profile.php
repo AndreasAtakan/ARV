@@ -36,7 +36,7 @@ $photo = getUserPhoto($user_id);
 
 $stmt = $PDO->prepare("
 	SELECT *
-	FROM \"Organization\"
+	FROM arv.\"Organization\"
 	WHERE id = ?
 ");
 $stmt->execute([$org_id]);

@@ -35,7 +35,7 @@ $org = getOrganization($org_id); $stmt = null;
 if($org["name"] == "__all__") {
 	$stmt = $PDO->prepare("
 		SELECT *
-		FROM \"Accounts\"
+		FROM arv.\"Accounts\"
 		ORDER BY created_date DESC
 	");
 	$stmt->execute();
@@ -43,7 +43,7 @@ if($org["name"] == "__all__") {
 else {
 	$stmt = $PDO->prepare("
 		SELECT *
-		FROM \"Accounts\"
+		FROM arv.\"Accounts\"
 		WHERE organization_id = ?
 		ORDER BY created_date DESC
 	");
@@ -184,7 +184,7 @@ $count = $stmt->rowCount();
 			width: calc(100vw - 39px - 20px) !important;
 		}
 		.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon-search,
-		.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--button { 
+		.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--button {
 			top: 12px !important;
 		}
 		.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--input {
@@ -621,6 +621,17 @@ $count = $stmt->rowCount();
 
 								<tr>
 									<td scope="row">
+										<a class="text-dark" href="https://kartkatalog.geonorge.no/metadata/grunnkart-for-bruk-i-arealregnskap-testversjon-1/28c28e3a-d88f-4a34-8c60-5efe6d56a44d" target="_blank">Grunnkart for bruk i arealregnskap</a>
+									</td>
+									<td>Statistisk sentralbyrå (SSB)</td>
+									<td>november 2024</td>
+									<td>
+										3. Fjerne allerede utbygde områder, <br />
+										4. Identifisere potensielle arealkonflikter
+									</td>
+								</tr>
+								<tr>
+									<td scope="row">
 										<a class="text-dark" href="https://kartkatalog.geonorge.no/metadata/ssb-arealbruk-2023/a965a979-c12a-4b26-90a0-f09de47dbecd" target="_blank">SSB-arealbruk 2023</a>
 									</td>
 									<td>Statistisk sentralbyrå (SSB)</td>
@@ -1028,6 +1039,11 @@ $count = $stmt->rowCount();
 							<i class="fa-solid fa-table"></i>
 						</button>
 					</li>
+					<li class="nav-item" role="presentation">
+						<button type="button" role="tab" class="nav-link" id="carbon-tab" data-bs-toggle="tab" data-bs-target="#carbon" aria-controls="carbon" aria-selected="false">
+							<i class="fa-solid fa-leaf"></i>
+						</button>
+					</li>
 					<li class="nav-item me-sm-auto" role="presentation">
 						<button type="button" role="tab" class="nav-link" id="table-tab" data-bs-toggle="tab" data-bs-target="#table" aria-controls="table" aria-selected="false">
 							<i class="fa-solid fa-list"></i>
@@ -1044,6 +1060,9 @@ $count = $stmt->rowCount();
 						<p class="text-muted mx-3 my-2">Velg et regnskap</p>
 					</div>
 					<div class="tab-pane fade" id="balance" role="tabpanel" aria-labelledby="balance-tab" tabindex="0">
+						<p class="text-muted mx-3 my-2">Velg et regnskap</p>
+					</div>
+					<div class="tab-pane fade" id="carbon" role="tabpanel" aria-labelledby="carbon-tab" tabindex="0">
 						<p class="text-muted mx-3 my-2">Velg et regnskap</p>
 					</div>
 					<div class="tab-pane fade" id="table" role="tabpanel" aria-labelledby="table-tab" tabindex="0">
@@ -1282,7 +1301,7 @@ $count = $stmt->rowCount();
 				<input type="checkbox" class="form-check-input" id="flomsone" data-layer="flomsone" value="flomsone" autocomplete="off" disabled />
 				<label class="form-check-label" for="flomsone">
 					&nbsp;
-					<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra NVEs data for 10-års flomsoner"></i>
+					<i class="fa-solid fa-circle-info small" data-bs-toggle="tooltip" data-bs-container="main" data-bs-html="true" title="Områder hentet fra NVEs data for flomsoner, inntil 200-års flom"></i>
 					Flomsone
 				</label>
 			</div>
@@ -1317,6 +1336,8 @@ $count = $stmt->rowCount();
 
 	<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" />
+	<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.js"></script>
+	<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.css" type="text/css">
 
 	<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 	<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
@@ -1569,6 +1590,7 @@ $count = $stmt->rowCount();
 			}
 
 			let format_area = n => formatDecimal(n, 1);
+			let format_number = format_area;
 			function filterOverlapp(data) {
 				let active = [], d = { ...data };
 
@@ -1582,7 +1604,7 @@ $count = $stmt->rowCount();
 				return d;
 			}
 
-			let reset_overlapp_graph;
+			let reset_overlapp_graph, reset_co2_graph;
 			function initDashboard() {
 				let plandata = _DATA.plandata.features.map(f => f.properties),
 					overlapp = _DATA.overlapp.features.map(f => f.properties),
@@ -1757,6 +1779,7 @@ $count = $stmt->rowCount();
 					</table>
 				`);
 
+				/*
 				data = groupArrayMany(plandata.filter(e => e.planlegging_status == "Tidligere plan"), "arealformaalsbeskrivelse", ["myr_m2", "skog_m2", "jordbruk_m2", "aapen_fastmark_m2", "kulturlandskap_m2", "skredfaresone_m2", "flomsone_m2", "over_skoggrense_m2", "strandsone_m2", "villrein_m2", "iba_m2", "planlagt_m2"]);
 				let data_all = groupArrayMany(plandata, "arealformaalsbeskrivelse", ["myr_m2", "skog_m2", "jordbruk_m2", "aapen_fastmark_m2", "kulturlandskap_m2", "skredfaresone_m2", "flomsone_m2", "over_skoggrense_m2", "strandsone_m2", "villrein_m2", "iba_m2", "planlagt_m2"]);
 				let fp = Object.keys(data)[0];
@@ -1809,6 +1832,42 @@ $count = $stmt->rowCount();
 						})}
 					</tr>
 				`);
+				*/
+
+
+				//
+				$("#report #carbon").html(`
+					<div class="graph" id="co2_bar"></div>
+				`);
+
+				data = sumProperties(overlapp, ["utslippseffekt_5aar", "utslippseffekt_20aar", "utslippseffekt_75aar"]);
+				_GRAPHS["co2_bar"] = Highcharts.chart("co2_bar", {
+					chart: { type: "bar" },
+					title: { text: "Utslippseffekt CO2", align: "left" },
+					subtitle: {
+						text: "Viser sammenlagt utslippseffekt for hele regnskapet",
+						align: "left"
+					},
+					yAxis: { title: { text: "Tonn CO2" } },
+					tooltip: { valueSuffix: " tonn" },
+					lang: { noData: "" },
+					plotOptions: { series: { allowPointSelect: false } },
+					legend: { enabled: false },
+					exporting: {
+						chartOptions: { lang: { noData: "" } }
+					},
+					series: [
+						{ name: "Tonn", data: Object.keys(data).map(e => [ _FELT[e], format_number(data[e]) ]) }
+					],
+					colors: Object.keys(data).map(e => _OVERLAPP_COLOR)
+				});
+				_GRAPHS["co2_bar"].__origData = data;
+				reset_co2_graph = () => {
+					let d = sumProperties(overlapp, ["utslippseffekt_5aar", "utslippseffekt_20aar", "utslippseffekt_75aar"]);
+					_GRAPHS["co2_bar"].__origData = d;
+					_GRAPHS["co2_bar"].series[0].setData( Object.keys(d).map(e => [ _FELT[e], format_number(d[e]) ]) );
+					_GRAPHS["co2_bar"].setSubtitle({ text: "Viser sammenlagt utslippseffekt for hele regnskapet" });
+				}
 
 
 				//
@@ -1831,10 +1890,12 @@ $count = $stmt->rowCount();
 						<tr>
 							${felt.map(p => {
 								let v = f[p];
+								if(!v && v != 0) {return "<td>?</td>";}
 								if(p.includes("_m2")) { v = format_area(v / 1000); }
 								if(["ikraft_dato", "plannmosaikkdato", "planreservedato"].indexOf(p) > -1) {
 									v = moment(v, "YYYYMMDD").format("DD MMM YYYY");
 								}
+								if(typeof v === "number") { v = format_number(v); }
 								return `<td>${v}</td>`;
 							})}
 						</tr>
@@ -1866,10 +1927,15 @@ $count = $stmt->rowCount();
 				$("button[data-bs-toggle=\"tab\"]").on("shown.bs.tab", ev => { if(_GRAPHS["plan_table"]) { _GRAPHS["plan_table"].draw(); } });
 			}
 
+			const canvas = document.createElement("canvas");
+			const ctx = canvas.getContext("2d");
+			canvas.width = 8;canvas.height = 8;
+			ctx.fillStyle = 'grey'; ctx.fillRect(0, 0, 4, 8); ctx.fillStyle = 'transparent'; ctx.fillRect(4, 0, 4, 8);
+
 			const removeSource = id => _MAP.getSource(id) && _MAP.removeSource(id);
 			const removeLayer = id => _MAP.getLayer(id) && _MAP.removeLayer(id);
 			const remove = id => { removeLayer(id); removeSource(id); };
-			function loadData(data, flag) {
+			async function loadData(data, flag) {
 				if(data) { _DATA = data; }
 				if(Object.keys(_DATA).length <= 0) { return; }
 				for(let d in _DATA) {
@@ -1877,12 +1943,16 @@ $count = $stmt->rowCount();
 				}
 
 				let plandata = _DATA["plandata"],
-					overlapp = _DATA["overlapp"];
-				if(flag || true) {
+					overlapp = _DATA["overlapp"],
+					natur = _DATA["natur"];
+				if(flag && false) {
 					let ignore = ["09 Idrettsanlegg", "10 Andre formål", "11 Samferdselsanlegg", "15 LNFR spredt"];
 					plandata.features = plandata.features.filter(f => ignore.indexOf(f.properties.arealformaalsgruppe) < 0);
 					overlapp.features = overlapp.features.filter(f => ignore.indexOf(f.properties.formaalsgruppe) < 0);
 				}
+
+				let imageBitmap = await createImageBitmap(canvas);
+				_MAP.addImage("striped-pattern", imageBitmap, { pixelRatio: 2 });
 
 				remove("kommunegrense");
 				_MAP.addSource("kommunegrense", {
@@ -1912,7 +1982,7 @@ $count = $stmt->rowCount();
 					"id": "plandata_gjeld",
 					"type": "fill",
 					"source": "plandata",
-					"filter": [ "==", "planlegging_status", "Tidligere plan" ],
+					"filter": ["any", ["==", "planlegging_status", "Tidligere plan"], ["!has", "planlegging_status"] ],
 					"paint": {
 						"fill-color": "#FEFEFE",
 						"fill-opacity": 0.6,
@@ -1924,7 +1994,7 @@ $count = $stmt->rowCount();
 					"id": "plandata_frem",
 					"type": "fill",
 					"source": "plandata",
-					"filter": [ "==", "planlegging_status", "Ny plan" ],
+					"filter": ["any", ["==", "planlegging_status", "Ny plan"], ["!has", "planlegging_status"] ],
 					"paint": {
 						"fill-color": "#FEFEFE",
 						"fill-opacity": _MAP_INDEX > 0 ? 1 : 0,
@@ -1936,6 +2006,24 @@ $count = $stmt->rowCount();
 					}
 				});
 				$("#section select#arealreserve").trigger("change");
+
+				let naturtyper = { "jordbruk": [20,21,22,23], "skog": [30,31,32,33,34,35], "åpen fastmark": [50,51,52,53,54,55], "myr": [60,61] };
+				removeSource("natur");
+				_MAP.addSource("natur", { "type": "geojson", "data": natur, "tolerance": 1 });
+				for(let n in naturtyper) {
+					let adekk = naturtyper[n];
+					removeLayer(`natur_${n}`);
+					_MAP.addLayer({
+						"id": `natur_${n}`,
+						"type": "fill",
+						"source": "natur",
+						"filter": ["in", "adekk", ...adekk],
+						"paint": { "fill-pattern": "striped-pattern" },
+						"layout": {
+							"visibility": $(`#section input[data-layer="${n}"]`)[0].checked ? "visible" : "none"
+						}
+					});
+				}
 
 				for(let type of _LAYERS.slice(1)) {
 					let features = overlapp.features.filter(f => f.properties["overlapp_type"] == type);
@@ -1954,7 +2042,7 @@ $count = $stmt->rowCount();
 						"id": `${type}_gjeld`,
 						"type": "fill",
 						"source": type,
-						"filter": [ "==", "planlegging_status", "Tidligere plan" ],
+						"filter": ["any", ["==", "planlegging_status", "Tidligere plan"], ["!has", "planlegging_status"] ],
 						"paint": {
 							"fill-color": _OVERLAPP_COLOR,
 							"fill-opacity": 0.8,
@@ -1970,7 +2058,7 @@ $count = $stmt->rowCount();
 						"id": `${type}_frem`,
 						"type": "fill",
 						"source": type,
-						"filter": [ "==", "planlegging_status", "Ny plan" ],
+						"filter": ["any", ["==", "planlegging_status", "Ny plan"], ["!has", "planlegging_status"] ],
 						"paint": {
 							"fill-color": _OVERLAPP_COLOR,
 							"fill-opacity": _MAP_INDEX > 0 ? 1 : 0,
@@ -2233,6 +2321,63 @@ $count = $stmt->rowCount();
 			});
 
 			_MAP.on("load", () => {
+				//
+				const co2_faktorer = [{"arealbruk": "Beite","jordtype": "Mineraljord","treslag": "Ikke relevant","bonitet": "Ikke relevant","CO2_forste_aar": 8.715185705,"CO2_videre_aar": 3.593333333},{"arealbruk": "Beite","jordtype": "Organisk jord","treslag": "Ikke relevant","bonitet": "Ikke relevant","CO2_forste_aar": 34.08851904,"CO2_videre_aar": 28.96666667},{"arealbruk": "Dyrket mark","jordtype": "Mineraljord","treslag": "Ikke relevant","bonitet": "Ikke relevant","CO2_forste_aar": 3.043333333,"CO2_videre_aar": 3.043333333},{"arealbruk": "Skog","jordtype": "Mineraljord","treslag": "Barskog","bonitet": "Høy","CO2_forste_aar": 57.65828879,"CO2_videre_aar": 14.19},{"arealbruk": "Skog","jordtype": "Mineraljord","treslag": "Barskog","bonitet": "Impediment","CO2_forste_aar": 26.67258599,"CO2_videre_aar": 14.19},{"arealbruk": "Skog","jordtype": "Mineraljord","treslag": "Barskog","bonitet": "Lav","CO2_forste_aar": 39.78418753,"CO2_videre_aar": 14.19},{"arealbruk": "Skog","jordtype": "Mineraljord","treslag": "Barskog","bonitet": "Middels","CO2_forste_aar": 48.60929589,"CO2_videre_aar": 14.19},{"arealbruk": "Skog","jordtype": "Mineraljord","treslag": "Barskog","bonitet": "Særs høy","CO2_forste_aar": 78.33329009,"CO2_videre_aar": 14.19},{"arealbruk": "Skog","jordtype": "Mineraljord","treslag": "Blandingsskog","bonitet": "Høy","CO2_forste_aar": 56.23502279,"CO2_videre_aar": 14.19},{"arealbruk": "Skog","jordtype": "Mineraljord","treslag": "Blandingsskog","bonitet": "Impediment","CO2_forste_aar": 30.02003464,"CO2_videre_aar": 14.19},{"arealbruk": "Skog","jordtype": "Mineraljord","treslag": "Blandingsskog","bonitet": "Lav","CO2_forste_aar": 39.74829092,"CO2_videre_aar": 14.19},{"arealbruk": "Skog","jordtype": "Mineraljord","treslag": "Blandingsskog","bonitet": "Middels","CO2_forste_aar": 47.99474615,"CO2_videre_aar": 14.19},{"arealbruk": "Skog","jordtype": "Mineraljord","treslag": "Blandingsskog","bonitet": "Særs høy","CO2_forste_aar": 56.23502279,"CO2_videre_aar": 14.19},{"arealbruk": "Skog","jordtype": "Mineraljord","treslag": "Lauvskog","bonitet": "Høy","CO2_forste_aar": 42.53231983,"CO2_videre_aar": 14.19},{"arealbruk": "Skog","jordtype": "Mineraljord","treslag": "Lauvskog","bonitet": "Impediment","CO2_forste_aar": 21.69201228,"CO2_videre_aar": 14.19},{"arealbruk": "Skog","jordtype": "Mineraljord","treslag": "Lauvskog","bonitet": "Lav","CO2_forste_aar": 22.53420839,"CO2_videre_aar": 14.19},{"arealbruk": "Skog","jordtype": "Mineraljord","treslag": "Lauvskog","bonitet": "Middels","CO2_forste_aar": 33.74764115,"CO2_videre_aar": 14.19},{"arealbruk": "Skog","jordtype": "Mineraljord","treslag": "Lauvskog","bonitet": "Særs høy","CO2_forste_aar": 54.60322682,"CO2_videre_aar": 14.19},{"arealbruk": "Skog","jordtype": "Organisk jord","treslag": "Barskog","bonitet": "Høy","CO2_forste_aar": 72.43495545,"CO2_videre_aar": 28.96666667},{"arealbruk": "Skog","jordtype": "Organisk jord","treslag": "Barskog","bonitet": "Impediment","CO2_forste_aar": 41.44925266,"CO2_videre_aar": 28.96666667},{"arealbruk": "Skog","jordtype": "Organisk jord","treslag": "Barskog","bonitet": "Lav","CO2_forste_aar": 54.5608542,"CO2_videre_aar": 28.96666667},{"arealbruk": "Skog","jordtype": "Organisk jord","treslag": "Barskog","bonitet": "Middels","CO2_forste_aar": 63.38596256,"CO2_videre_aar": 28.96666667},{"arealbruk": "Skog","jordtype": "Organisk jord","treslag": "Barskog","bonitet": "Særs høy","CO2_forste_aar": 93.10995676,"CO2_videre_aar": 28.96666667},{"arealbruk": "Skog","jordtype": "Organisk jord","treslag": "Blandingsskog","bonitet": "Høy","CO2_forste_aar": 71.01168946,"CO2_videre_aar": 28.96666667},{"arealbruk": "Skog","jordtype": "Organisk jord","treslag": "Blandingsskog","bonitet": "Impediment","CO2_forste_aar": 44.79670131,"CO2_videre_aar": 28.96666667},{"arealbruk": "Skog","jordtype": "Organisk jord","treslag": "Blandingsskog","bonitet": "Lav","CO2_forste_aar": 54.52495758,"CO2_videre_aar": 28.96666667},{"arealbruk": "Skog","jordtype": "Organisk jord","treslag": "Blandingsskog","bonitet": "Middels","CO2_forste_aar": 62.77141282,"CO2_videre_aar": 28.96666667},{"arealbruk": "Skog","jordtype": "Organisk jord","treslag": "Blandingsskog","bonitet": "Særs høy","CO2_forste_aar": 71.01168946,"CO2_videre_aar": 28.96666667},{"arealbruk": "Skog","jordtype": "Organisk jord","treslag": "Lauvskog","bonitet": "Høy","CO2_forste_aar": 57.30898649,"CO2_videre_aar": 28.96666667},{"arealbruk": "Skog","jordtype": "Organisk jord","treslag": "Lauvskog","bonitet": "Impediment","CO2_forste_aar": 36.46867895,"CO2_videre_aar": 28.96666667},{"arealbruk": "Skog","jordtype": "Organisk jord","treslag": "Lauvskog","bonitet": "Lav","CO2_forste_aar": 37.31087505,"CO2_videre_aar": 28.96666667},{"arealbruk": "Skog","jordtype": "Organisk jord","treslag": "Lauvskog","bonitet": "Middels","CO2_forste_aar": 48.52430782,"CO2_videre_aar": 28.96666667},{"arealbruk": "Skog","jordtype": "Organisk jord","treslag": "Lauvskog","bonitet": "Særs høy","CO2_forste_aar": 69.37989349,"CO2_videre_aar": 28.96666667},{"arealbruk": "Vann og myr","jordtype": "Mineraljord","treslag": "Ikke relevant","bonitet": "Ikke relevant","CO2_forste_aar": 3.19,"CO2_videre_aar": 3.19},{"arealbruk": "Vann og myr","jordtype": "Organisk jord","treslag": "Ikke relevant","bonitet": "Ikke relevant","CO2_forste_aar": 28.96666667,"CO2_videre_aar": 28.96666667},{"arealbruk": "Dyrket mark","jordtype": "Organisk jord","treslag": "Ikke relevant","bonitet": "Ikke relevant","CO2_forste_aar": 28.96666667,"CO2_videre_aar": 28.96666667}];
+				let draw = new MapboxDraw({ displayControlsDefault: false, controls: { polygon: true, trash: true } });
+				_MAP.addControl(draw);
+				_MAP.on("draw.create", updateCarbon);
+				_MAP.on("draw.update", updateCarbon);
+				_MAP.on("draw.delete", updateCarbon);
+				function updateCarbon(ev) {
+					let res = { "utslippseffekt_5aar": 0, "utslippseffekt_20aar": 0, "utslippseffekt_75aar": 0 },
+						d = draw.getAll();
+					if(d.features.length <= 0) { reset_co2_graph(); return; };
+
+					let overlapp = polygonsOverlapp(_DATA["overlapp"], d);
+					for(f of overlapp) {
+						let a = turf.area(f) / 10000,
+							p = f.properties, faktor_1, faktor_n;
+
+						if(p.overlapp_type == "skog") {
+							for(let _f of co2_faktorer) {
+								if(_f.arealbruk == "Skog"
+								&& _f.jordtype == p.grunnforhold
+								&& _f.treslag == p.treslag
+								&& _f.bonitet == p.bonitet)
+								{ faktor_1 = _f.CO2_forste_aar; faktor_n = _f.CO2_videre_aar; break; }
+							}
+						}
+						else
+						if(p.overlapp_type == "jordbruk") {
+							for(let _f of co2_faktorer) {
+								if(_f.jordtype == p.grunnforhold) {
+									if(p.jordbruk != "Innmarksbeite" && _f.arealbruk == "Dyrket mark")
+									{ faktor_1 = _f.CO2_forste_aar; faktor_n = _f.CO2_videre_aar; break; }
+									if(p.jordbruk == "Innmarksbeite" && _f.arealbruk == "Beite")
+									{ faktor_1 = _f.CO2_forste_aar; faktor_n = _f.CO2_videre_aar; break; }
+								}
+							}
+						}
+						else
+						if(p.overlapp_type == "myr") {
+							for(let _f of co2_faktorer) {
+								if(_f.arealbruk == "Vann og myr"
+								&& _f.jordtype == p.grunnforhold)
+								{ faktor_1 = _f.CO2_forste_aar; faktor_n = _f.CO2_videre_aar; break; }
+							}
+						}
+
+						if(!faktor_1 || !faktor_n) { continue; }
+						res["utslippseffekt_5aar"] += a*faktor_1 + 4*a*faktor_n;
+						res["utslippseffekt_20aar"] += a*faktor_1 + 19*a*faktor_n;
+						res["utslippseffekt_75aar"] += a*faktor_1 + 74*a*faktor_n;
+					}
+
+					//_GRAPHS["co2_bar"].__origData = res;
+					_GRAPHS["co2_bar"].series[0].setData( Object.keys(res).map(e => [ _FELT[e], format_number(res[e]) ]) );
+					_GRAPHS["co2_bar"].setSubtitle({ text: "Utslippseffekt for markert område" });
+				}
+
 				let runningDownload = false;
 				$("#docModal button#result_download").click(ev => {
 					if(runningDownload) { return; } runningDownload = true;
@@ -2426,6 +2571,9 @@ $count = $stmt->rowCount();
 
 						_MAP.setLayoutProperty(`${layer}_gjeld`, "visibility", v);
 						if(_MAP_INDEX > 0) { _MAP.setLayoutProperty(`${layer}_frem`, "visibility", v); }
+						if(["aapen_fastmark", "myr", "skog", "jordbruk"].indexOf(layer) > -1) {
+							_MAP.setLayoutProperty(`natur_${_l}`, "visibility", v);
+						}
 
 						$(`#section input[data-parentlayer="${l}"]`).parent().toggle(checked);
 
@@ -2439,7 +2587,7 @@ $count = $stmt->rowCount();
 					});
 				});
 
-				let overlapp_felt = ["myr_m2", "skog_m2", "jordbruk_m2", "aapen_fastmark_m2", "kulturlandskap_m2", "skredfaresone_m2", "flomsone_m2", "over_skoggrense_m2", "strandsone_m2", "villrein_m2", "iba_m2"];
+				let overlapp_felt = ["myr_m2", "skog_m2", "jordbruk_m2", "aapen_fastmark_m2", "kulturlandskap_m2", "skredfaresone_m2", "flomsone_m2", "over_skoggrense_m2", "strandsone_m2", "villrein_m2", "iba_m2", "utslippseffekt_5aar", "utslippseffekt_20aar", "utslippseffekt_75aar"];
 				[ ..._LAYERS ].reverse()
 				.map(l => [`${l}_gjeld`, `${l}_frem`]).flat()
 				.forEach(l => 
@@ -2455,9 +2603,10 @@ $count = $stmt->rowCount();
 							let v = props[p];
 							if([ ...overlapp_felt ].indexOf(p) > -1
 							|| (!v && v != 0)) { continue; }
-							if(["ikrafttredelsesdato", "plannmosaikkdato", "planreservedato"].indexOf(p) > -1) {
+							if(["ikraft_dato", "ikrafttredelsesdato", "plannmosaikkdato", "planreservedato"].indexOf(p) > -1) {
 								v = moment(v, "YYYYMMDD").format("DD MMM YYYY");
 							}
+							if(typeof v === "number") { v = format_number(v); }
 							cont += `<tr><th>${_FELT[p]}</th> <td>${v}</td></tr>`;
 						}
 
@@ -2518,6 +2667,38 @@ $count = $stmt->rowCount();
 						d = filterOverlapp(d);
 						_GRAPHS["overlapp_bar"].series[0].setData( Object.keys(d).map(e => [ e, format_area(d[e] / 1000) ]) );
 						_GRAPHS["overlapp_bar"].setSubtitle({ text: `Arealer for område ${props.id}` });
+
+						d = {};
+						for(let p of ["utslippseffekt_5aar", "utslippseffekt_20aar", "utslippseffekt_75aar"]) { d[p] = props[p]; }
+						_GRAPHS["co2_bar"].__origData = d;
+						_GRAPHS["co2_bar"].series[0].setData( Object.keys(d).map(e => [ _FELT[e], format_number(d[e]) ]) );
+						_GRAPHS["co2_bar"].setSubtitle({ text: `Utslippseffekt for område ${props.id}` });
+					})
+				);
+
+				["aapen_fastmark", "myr", "skog", "jordbruk"].forEach(l => 
+					_MAP.on("click", `natur_${l}`, ev => {
+						ev.layer_click = true;
+						if(_POPUP.isOpen() && !ev.from_plan_table) { return; }
+
+						let latlng = ev.lngLat,
+							props = ev.props || ev.features[0].properties;
+
+						let cont = "",
+							felt = {
+								"arealdekke": "Arealdekke",
+								"okosystemtype_niva2": "Økosystemtype"
+							};
+						for(let p in felt) {
+							let v = props[p];
+							if(!v && v != 0) { continue; }
+							cont += `<tr><th>${felt[p]}</th> <td>${v}</td></tr>`;
+						}
+
+						_POPUP
+							.setLngLat(latlng)
+							.setHTML(`<table style="width:100%;">${cont}</table>`)
+							.addTo(_MAP);
 					})
 				);
 
@@ -2529,7 +2710,7 @@ $count = $stmt->rowCount();
 					.forEach( l => _MAP.setPaintProperty(l, "fill-outline-color", "#b3b3b3") );
 				});
 
-				_POPUP.on("close", ev => { reset_overlapp_graph(); });
+				_POPUP.on("close", ev => { reset_overlapp_graph(); reset_co2_graph(); });
 			});
 
 

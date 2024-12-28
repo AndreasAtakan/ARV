@@ -32,7 +32,7 @@ $pass = "";
 $db   = "";
 //$charset = "utf8mb4";
 
-$dsn = "pgsql:host=$host;port=$port;dbname=$db;options='--search_path=arv --client_encoding=UTF8'";
+$dsn = "pgsql:host=$host;port=$port;dbname=$db;options='--client_encoding=UTF8'";
 $options = array(
 	\PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
 	\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,

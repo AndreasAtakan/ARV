@@ -216,7 +216,7 @@ if($signed_in) {
 							<p class="lead">
 								Jan Eirik Heggdal <br />
 								<a href="mailto:jeh@geotales.io" class="text-dark">jeh@geotales.io</a> ,
-								+47 468 45 196
+								468 45 196
 							</p>
 						</div>
 
@@ -224,7 +224,7 @@ if($signed_in) {
 							<p class="lead">
 								Andreas Atakan <br />
 								<a href="mailto:aca@geotales.io" class="text-dark">aca@geotales.io</a> ,
-								+47 480 06 325
+								480 06 325
 							</p>
 						</div>
 					</div>

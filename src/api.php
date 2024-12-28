@@ -38,7 +38,7 @@ if($op == "analytics") {
 
 	if(signedIn()) { $user_id = $_SESSION["user_id"]; }
 
-	$stmt = $PDO->prepare("INSERT INTO \"Analytics\" (user_id, page, location, latitude, longitude, agent) VALUES (?, ?, ?, ?, ?, ?)");
+	$stmt = $PDO->prepare("INSERT INTO arv.\"Analytics\" (user_id, page, location, latitude, longitude, agent) VALUES (?, ?, ?, ?, ?, ?)");
 	$stmt->execute([$user_id, $page, $location, $lat, $lng, $agent]);
 	exit;
 
@@ -83,7 +83,7 @@ if($op == "matrikkel_search") {
 
 	$stmt = $PDO->prepare("
 		SELECT objid, teigid, matrikkelenhetid, matrikkelenhetstype, matrikkelnummertekst, noyaktighetsklasseteig, gardsnummer, bruksnummer, bruksnavn, kommunenummer, kommunenavn, areal_m2, utbyggingspotensiale_m2, aapen_fastmark_m2, myr_m2, skog_m2, jordbruk_m2, kulturlandskap_m2, strandsone_m2, skredfaresone_m2, flomsone_m2, villrein_m2, ST_AsGeoJSON( ST_Transform(representasjonspunkt, 4326) ) as representasjonspunkt
-		FROM \"teig\"
+		FROM arv.\"teig\"
 		WHERE {$where}
 		LIMIT 50
 	");
@@ -160,7 +160,7 @@ if($op == "accounts_create") {
 	if($r === false) { accountsSafeExit($_FILES); http_response_code(500); exit; }
 
 	// Fjerne alle allerede utbygde områder
-	$stmt = $PDO->prepare("SELECT kommunenummer AS knr, fylkesnummer AS fnr FROM \"__planer\" LIMIT 1"); $stmt->execute();
+	$stmt = $PDO->prepare("SELECT kommunenummer AS knr, fylkesnummer AS fnr FROM arv.\"__planer\" LIMIT 1"); $stmt->execute();
 	$row = $stmt->fetch();
 	$sql =file_get_contents(__DIR__."/analysis/KDD_PLANRESERVE.sql");
 	$sql = str_replace("%k", $row['knr'], $sql);
@@ -182,22 +182,22 @@ if($op == "accounts_create") {
 	$r = $r || $PDO->exec("CALL omraade_overlapp('iba', 'iba_norge_u_svalbard');") === false;
 	if($r) { accountsSafeExit($_FILES); http_response_code(500); exit; }
 
-	$PDO->exec("ALTER TABLE \"__planer\" ALTER COLUMN geom TYPE Geometry(MultiPolygon, 4326) USING ST_Transform(geom, 4326)");
-	$PDO->exec("ALTER TABLE \"__overlapp\" ALTER COLUMN geom TYPE Geometry(MultiPolygon, 4326) USING ST_Transform(geom, 4326)");
-	$PDO->exec("DROP INDEX IF EXISTS \"idx___planer_geometry\"");
+	$PDO->exec("ALTER TABLE arv.\"__planer\" ALTER COLUMN geom TYPE Geometry(MultiPolygon, 4326) USING ST_Transform(geom, 4326)");
+	$PDO->exec("ALTER TABLE arv.\"__overlapp\" ALTER COLUMN geom TYPE Geometry(MultiPolygon, 4326) USING ST_Transform(geom, 4326)");
+	$PDO->exec("DROP INDEX IF EXISTS arv.\"idx___planer_geometry\"");
 
 	$id = uniqid();
 	$plandata = "plan_{$id}";
 	$overlapp = "overlapp_{$id}";
 
-	$PDO->exec("ALTER TABLE \"__planer\" RENAME TO \"".$plandata."\"");
-	$PDO->exec("ALTER TABLE \"__overlapp\" RENAME TO \"".$overlapp."\"");
+	$PDO->exec("ALTER TABLE arv.\"__planer\" RENAME TO \"".$plandata."\"");
+	$PDO->exec("ALTER TABLE arv.\"__overlapp\" RENAME TO \"".$overlapp."\"");
 
 	$planfiler = "";
 	foreach($regplanList as $k => $v) { $planfiler .= "{$v['name']},"; }
 	$planfiler = rtrim($planfiler, ",");
 
-	$stmt = $PDO->prepare("INSERT INTO \"Accounts\" (organization_id, title, description, plandata, overlapp, planfiler) VALUES (?, ?, ?, ?, ?, ?) RETURNING id");
+	$stmt = $PDO->prepare("INSERT INTO arv.\"Accounts\" (organization_id, title, description, plandata, overlapp, planfiler) VALUES (?, ?, ?, ?, ?, ?) RETURNING id");
 	$stmt->execute([ getUserOrganization($user_id), $title, $description, $plandata, $overlapp, $planfiler ]);
 	$id = $stmt->fetchColumn();
 
@@ -222,7 +222,7 @@ if($op == "accounts_edit") {
 		http_response_code(401); exit;
 	}
 
-	$stmt = $PDO->prepare("UPDATE \"Accounts\" SET title = ?, description = ? WHERE id = ?");
+	$stmt = $PDO->prepare("UPDATE arv.\"Accounts\" SET title = ?, description = ? WHERE id = ?");
 	$stmt->execute([$title, $description, $id]);
 
 	echo json_encode(array("status" => "success"));
@@ -241,13 +241,13 @@ if($op == "accounts_delete") {
 		http_response_code(401); exit;
 	}
 
-	$stmt = $PDO->prepare("SELECT plandata, overlapp FROM \"Accounts\" WHERE id = ?");
+	$stmt = $PDO->prepare("SELECT plandata, overlapp FROM arv.\"Accounts\" WHERE id = ?");
 	$stmt->execute([$id]);
 	$row = $stmt->fetch();
 
-	$PDO->exec("DROP TABLE IF EXISTS \"".$row['plandata']."\", \"".$row['overlapp']."\"");
+	$PDO->exec("DROP TABLE IF EXISTS arv.\"".$row['plandata']."\", arv.\"".$row['overlapp']."\"");
 
-	$stmt = $PDO->prepare("DELETE FROM \"Accounts\" WHERE id = ?");
+	$stmt = $PDO->prepare("DELETE FROM arv.\"Accounts\" WHERE id = ?");
 	$stmt->execute([$id]);
 
 	echo json_encode(array("status" => "success"));
@@ -266,7 +266,7 @@ if($op == "accounts_getdata") {
 		http_response_code(401); exit;
 	}
 
-	$stmt = $PDO->prepare("SELECT title, plandata, overlapp FROM \"Accounts\" WHERE id = ?");
+	$stmt = $PDO->prepare("SELECT organization_id AS org_id, title, plandata, overlapp FROM arv.\"Accounts\" WHERE id = ?");
 	$stmt->execute([$id]);
 	$row = $stmt->fetch();
 
@@ -276,7 +276,7 @@ if($op == "accounts_getdata") {
 				'type', 'FeatureCollection',
 				'features', json_agg(ST_AsGeoJSON(T.*)::json)
 			) AS g
-		FROM \"".$row['plandata']."\" AS T
+		FROM arv.\"".$row['plandata']."\" AS T
 	");
 	$stmt->execute();
 	$r = $stmt->fetch();
@@ -288,15 +288,48 @@ if($op == "accounts_getdata") {
 				'type', 'FeatureCollection',
 				'features', json_agg(ST_AsGeoJSON(T.*)::json)
 			) AS g
-		FROM \"".$row['overlapp']."\" AS T
+		FROM arv.\"".$row['overlapp']."\" AS T
 	");
 	$stmt->execute();
 	$r = $stmt->fetch();
 	$overlapp = $r["g"];
 
+	$natur = null;
+	if(in_array(getOrganizationKnr($row['org_id']), ["4651"])) {
+		$stmt = $PDO->prepare("
+			SELECT
+				json_build_object(
+					'type', 'FeatureCollection',
+					'features', json_agg(
+						json_build_object(
+							'type', 'Feature',
+							'geometry', ST_AsGeoJSON(ST_Transform(T.geom, 4326))::json,
+							'properties', json_build_object(
+								'adekk', T.adekk,
+								'arealdekke', T.arealdekke,
+								'okosys', T.okosys,
+								'okosystemtype_niva2', T.okosystemtype_niva2
+							)
+						)
+					)
+				) AS g
+			FROM
+				grunnkart_arealregnskap_vikane AS T,
+				(
+					SELECT ST_Buffer(ST_Transform(ST_SetSRID(ST_Extent(geom), 4326), 25833), 10) AS geom
+					FROM arv.\"".$row['plandata']."\"
+				) AS BBOX
+			WHERE ST_Intersects(T.geom, BBOX.geom)
+		");
+		$stmt->execute();
+		$r = $stmt->fetch();
+		$natur = $r["g"];
+	}
+
 	$res = array(
 		"plandata" => $plandata,
-		"overlapp" => $overlapp
+		"overlapp" => $overlapp,
+		"natur" => $natur
 	);
 
 	if(true || str_contains(strtolower($row["title"]), "kommune")) {
@@ -311,7 +344,7 @@ if($op == "accounts_getdata") {
 					SELECT ST_Transform(K.geom, 4326) AS geom
 					FROM
 						\"kommuner\" AS K,
-						(SELECT fylkesnummer, kommunenummer FROM \"".$row['plandata']."\" LIMIT 1) AS P
+						(SELECT fylkesnummer, kommunenummer FROM arv.\"".$row['plandata']."\" LIMIT 1) AS P
 					WHERE
 						K.fylkesnummer = P.fylkesnummer AND
 						K.kommunenummer = P.kommunenummer
@@ -345,7 +378,7 @@ if($op == "reset_pw") {
 	/* TODO:
 	$password = bin2hex(random_bytes(12));
 
-	$stmt = $PDO->prepare("UPDATE \"User\" SET password = ? WHERE username = ? AND email = ?");
+	$stmt = $PDO->prepare("UPDATE arv.\"User\" SET password = ? WHERE username = ? AND email = ?");
 	$stmt->execute([pw_hash($password), $username, $email]);
 
 	$subject = "GeoTales: password reset";

@@ -12,6 +12,15 @@ function uuid(a) {
 	return a ? (a^Math.random()*16>>a/4).toString(16) : ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, uuid);
 }
 
+function sumProperties(arr, props) {
+	let d = {};
+	for(let p of props) {
+		d[p] = 0;
+		for(let r of arr) { d[p] += parseFloat(r[p] || 0); }
+	}
+	return d;
+}
+
 function groupProperty(arr, p) {
 	let d = [];
 	for(let r of arr) { if(d.indexOf(r[p]) < 0) { d.push(r[p]); } }
@@ -55,6 +64,27 @@ function mapRegisterControlPosition(map, name) {
 
 
 
+function polygonsOverlapp(fc1, fc2) {
+	let overlaps = [];
+
+	fc1.features.forEach(f1 => {
+		if(f1.geometry.type !== "Polygon" && f1.geometry.type !== "MultiPolygon") { return; }
+		fc2.features.forEach(f2 => {
+			if(f2.geometry.type !== "Polygon" && f2.geometry.type !== "MultiPolygon") { return; }
+			let intersection = turf.intersect(f1, f2);
+			if(intersection) {
+				intersection.properties = { ...f1.properties, ...f2.properties };
+				overlaps.push(intersection);
+			}
+		});
+	});
+
+	return overlaps;
+}
+
+
+
+
 const _FELT = {
 	"id":						"ID",
 	"objtype":					"Objekttype",
@@ -88,6 +118,7 @@ const _FELT = {
 	"skog_m2":					"Skog m<sup>2</sup>",
 	"jordbruk_m2":				"Jordbruk m<sup>2</sup>",
 	"aapen_fastmark_m2":		"Åpen fastmark m<sup>2</sup>",
+	//"bebgyd_m2":				"Urbane områder m<sup>2</sup>",
 	"kulturlandskap_m2":		"Kulturlandskap m<sup>2</sup>",
 	"skredfaresone_m2":			"Skredfaresone m<sup>2</sup>",
 	"flomsone_m2":				"Flomsone m<sup>2</sup>",
@@ -95,6 +126,9 @@ const _FELT = {
 	"strandsone_m2":			"Strandsone m<sup>2</sup>",
 	"villrein_m2":				"Villrein m<sup>2</sup>",
 	"iba_m2":					"Viktige-fugleområder m<sup>2</sup>",
+	"utslippseffekt_5aar":		"Utslippseffekt 5 år tonn",
+	"utslippseffekt_20aar":		"Utslippseffekt 20 år tonn",
+	"utslippseffekt_75aar":		"Utslippseffekt 75 år tonn",
 
 	"areal_m2":					"Areal m<sup>2</sup>"
 };

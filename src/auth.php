@@ -43,7 +43,7 @@ if(isset($_REQUEST['op'])) {
 
 		case "signin":
 			if($TESTING) {
-				$stmt = $PDO->prepare("SELECT id FROM \"User\" WHERE username = 'Andreas'");
+				$stmt = $PDO->prepare("SELECT id FROM arv.\"User\" WHERE username = 'Andreas'");
 				$stmt->execute();
 				$row = $stmt->fetch();
 				signIn( $row['id'] ); // log user in
@@ -58,12 +58,12 @@ if(isset($_REQUEST['op'])) {
 
 			$check = validSignIn($email, $password);
 			if($check) {
-				$stmt = $PDO->prepare("SELECT id FROM \"User\" WHERE email = ?");
+				$stmt = $PDO->prepare("SELECT id FROM arv.\"User\" WHERE email = ?");
 				$stmt->execute([$email]);
 				$row = $stmt->fetch();
 				$user_id = $row['id'];
 
-				$stmt = $PDO->prepare("UPDATE \"User\" SET last_signin_date = NOW() WHERE id = ?");
+				$stmt = $PDO->prepare("UPDATE arv.\"User\" SET last_signin_date = NOW() WHERE id = ?");
 				$stmt->execute([$user_id]);
 
 				signIn($user_id); // log user in
@@ -79,7 +79,7 @@ if(isset($_REQUEST['op'])) {
 
 			$user_id = validAuthCode($auth);
 			if($user_id) {
-				$stmt = $PDO->prepare("UPDATE \"User\" SET last_signin_date = NOW() WHERE id = ?");
+				$stmt = $PDO->prepare("UPDATE arv.\"User\" SET last_signin_date = NOW() WHERE id = ?");
 				$stmt->execute([$user_id]);
 
 				signIn($user_id); // log user in
