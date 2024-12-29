@@ -1,4 +1,4 @@
-<?php
+<!--
 /*******************************************************************************
 * Copyright (C) Nordfjord EDB AS - All Rights Reserved                         *
 *                                                                              *
@@ -6,34 +6,7 @@
 * Proprietary and confidential                                                 *
 * Written by Andreas Atakan <aca@geotales.io>, September 2023                  *
 *******************************************************************************/
-
-session_start();
-
-require "init.php";
-require_once "helper.php";
-
-$loc = "index.php";
-if(isset($_REQUEST['return_url'])) {
-	$loc = $_REQUEST['return_url'];
-}
-
-if(isset($_REQUEST['auth'])) {
-	$auth = $_REQUEST['auth'];
-	header("location: auth.php?op=signin_authcode&auth=$auth"); exit;
-}
-
-$signed_in = signedIn();
-$user_id = null;
-$csrf_token = null;
-$photo = null;
-
-if($signed_in) {
-	$user_id = $_SESSION['user_id'];
-	$csrf_token = $_SESSION['csrf_token'];
-	$photo = getUserPhoto($user_id);
-}
-
-?>
+-->
 
 <!DOCTYPE html>
 <html lang="no">
@@ -121,7 +94,7 @@ if($signed_in) {
 	<header>
 		<nav class="navbar navbar-expand-sm navbar-dark shadow" id="nav">
 			<div class="container">
-				<a class="navbar-brand p-0" href="<?php echo signedIn() ? "accounts.php" : "index.php"; ?>">
+				<a class="navbar-brand p-0" href="#">
 					<img src="assets/logo.png" class="rounded" alt="ARV" height="40" width="auto" />
 				</a>
 
@@ -132,31 +105,28 @@ if($signed_in) {
 				<div class="collapse navbar-collapse" id="navbarCollapse" style="/*flex-grow: 0;*/">
 					<ul class="navbar-nav me-auto my-2 my-sm-0 navbar-nav-scroll" style="--bs-scroll-height: 250px;">
 						<li class="nav-item me-sm-2">
-							<a class="nav-link active" aria-current="page" href="index.php">Hjem</a>
+							<a class="nav-link active" aria-current="page" href="#">Hjem</a>
 						</li>
 						<li class="nav-item me-sm-2">
-							<a class="nav-link" href="about.php">Mer om ARV</a>
+							<a class="nav-link" href="about.html">Mer om ARV</a>
 						</li>
 						<li class="nav-item me-sm-2">
-							<a class="nav-link" href="about.php#contact">Kontakt oss</a>
+							<a class="nav-link" href="about.html#contact">Kontakt oss</a>
 						</li>
 					</ul>
 
-					<?php if($signed_in) { ?>
-						<div class="dropdown">
-							<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-								<img class="rounded" src="<?php echo $photo; ?>" alt="&nbsp;" width="auto" height="25" />
-							</a>
-							<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
-								<li><a class="dropdown-item" href="accounts.php">Mine arealregnskap</a></li>
-								<li><a class="dropdown-item" href="profile.php">Min profil</a></li>
-								<li><hr class="dropdown-divider"></li>
-								<li><a class="dropdown-item" href="logout.php?csrf_token=<?php echo $csrf_token; ?>">Logg ut</a></li>
-							</ul>
-						</div>
-					<?php } else { ?>
-						<a role="button" class="btn btn-sm btn-outline-light my-1" href="login.php">Logg inn</a>
-					<?php } ?>
+					<!--div class="dropdown">
+						<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+							<img class="rounded" src="???" alt="&nbsp;" width="auto" height="25" />
+						</a>
+						<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
+							<li><a class="dropdown-item" href="accounts.html">Mine arealregnskap</a></li>
+							<li><a class="dropdown-item" href="profile.html">Min profil</a></li>
+							<li><hr class="dropdown-divider"></li>
+							<li><a class="dropdown-item" href="???">Logg ut</a></li>
+						</ul>
+					</div-->
+					<a role="button" class="btn btn-sm btn-outline-light my-1" href="???">Logg inn</a>
 				</div>
 			</div>
 		</nav>
@@ -248,14 +218,6 @@ if($signed_in) {
 
 		window.addEventListener("load", function() {
 			$("span#ccYear").html( (new Date()).getFullYear() );
-
-			$.ajax({
-				type: "POST",
-				url: "api.php",
-				data: { "op": "analytics", "agent": window.navigator ? window.navigator.userAgent : null },
-				success: function(result, status, xhr) { console.log("Analytics registered"); },
-				error: function(xhr, status, error) { console.log(xhr.status, error); }
-			});
 		});
 
 	</script>

@@ -1,13 +1,13 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: SAM template for a web app with Cognito, Lambda, and CloudFront/S3 hosting
+Description: Web app with Cognito, Lambda, and CloudFront/S3 hosting
 
 Resources:
   # Cognito User Pool
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: MyUserPool
+      UserPoolName: ARV
       AutoVerifiedAttributes:
         - email
       Policies:
@@ -23,7 +23,7 @@ Resources:
     Type: AWS::Cognito::UserPoolClient
     Properties:
       UserPoolId: !Ref CognitoUserPool
-      ClientName: MyUserPoolClient
+      ClientName: ARVUserPoolClient
       GenerateSecret: false
       AllowedOAuthFlows:
         - code
@@ -32,37 +32,37 @@ Resources:
         - openid
         - profile
       CallbackURLs:
-        - https://<your-cloudfront-domain>/callback
+        - https://arv.geotales.io/signin
       LogoutURLs:
-        - https://<your-cloudfront-domain>/logout
+        - https://arv.geotales.io/signout
 
   # Cognito User Pool Domain
   CognitoUserPoolDomain:
     Type: AWS::Cognito::UserPoolDomain
     Properties:
-      Domain: my-app-domain # Replace with your unique subdomain
+      Domain: arv.geotales.io # Replace with your unique subdomain
       UserPoolId: !Ref CognitoUserPool
 
   # Lambda Function for Backend
-  BackendFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: app.lambda_handler
-      Runtime: python3.9
-      CodeUri: backend/
-      Policies:
-        - AmazonDynamoDBFullAccess
-      Environment:
-        Variables:
-          COGNITO_USER_POOL_ID: !Ref CognitoUserPool
-          COGNITO_USER_POOL_CLIENT_ID: !Ref CognitoUserPoolClient
-
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: /api/{proxy+}
-            Method: ANY
+  #BackendFunction:
+  #  Type: AWS::Serverless::Function
+  #  Properties:
+  #    Handler: app.lambda_handler
+  #    Runtime: python3.10
+  #    CodeUri: backend/
+  #    Policies:
+  #      - AmazonRDSFullAccess
+  #    Environment:
+  #      Variables:
+  #        COGNITO_USER_POOL_ID: !Ref CognitoUserPool
+  #        COGNITO_USER_POOL_CLIENT_ID: !Ref CognitoUserPoolClient
+  #
+  #    Events:
+  #      Api:
+  #        Type: Api
+  #        Properties:
+  #          Path: /api/{proxy+}
+  #          Method: ANY
 
   # S3 Bucket for Frontend Hosting
   FrontendBucket:

@@ -2,6 +2,7 @@ import json
 import os
 import psycopg2
 from psycopg2 import sql
+from common.common import user_account_access, account_kommune
 
 DB_HOST = os.getenv('DB_HOST')
 DB_NAME = os.getenv('DB_NAME')
@@ -10,11 +11,10 @@ DB_PASSWORD = os.getenv('DB_PASSWORD')
 
 def lambda_handler(event, context):
 	if 'id' not in event or \
-	   'user_id' not in event: return { 'statusCode': 422, 'body': json.dumps({'error': 'Missing field in request'}) }
+	   'username' not in event: return { 'statusCode': 422, 'body': json.dumps({'error': 'Missing field in request'}) }
 
 	_id = event['id']
-	user_id = event['user_id']
-	# IMPLEMENT; check if user has access to account
+	username = event['username']
 
 	RES = {}
 	STATUS_CODE = 0
@@ -23,7 +23,9 @@ def lambda_handler(event, context):
 		conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD)
 		cur = conn.cursor()
 
-		cur.execute('SELECT plandata, overlapp FROM arv.\"Accounts\" WHERE id = %s', (_id))
+		if not user_account_access(username _id, cur): return { 'statusCode': 401, 'body': json.dumps({'error': 'Unauthorized'}) }
+
+		cur.execute('SELECT plandata, overlapp FROM arv.\"Accounts\" WHERE id = %s', (_id,))
 		row = cur.fetchone()
 		pd = row[0]; ol = row[1]
 		cur.execute( sql.SQL('SELECT fylkesnummer, kommunenummer FROM arv.{} LIMIT 1').format(sql.Identifier(pd)) )
@@ -54,7 +56,7 @@ def lambda_handler(event, context):
 		row = cur.fetchone()
 		RES['overlapp'] = row[0]
 
-		if True: # if arealregnskapet er dekket i grunnkart_for_arealregnskap
+		if True: # TODO; if arealregnskapet er dekket i grunnkart_for_arealregnskap
 			q = sql.SQL(
 				'''SELECT
 					json_build_object(
@@ -81,7 +83,7 @@ def lambda_handler(event, context):
 			row = cur.fetchone()
 			RES['natur'] = row[0]
 
-		if True: # if eier organisasjon er en kommune
+		if account_kommune(_id, cur): # er eier organisasjon en kommune?
 			q = sql.SQL(
 				'''SELECT
 					json_build_object(
@@ -112,4 +114,4 @@ def lambda_handler(event, context):
 
 	finally:
 		cur.close(); conn.close()
-		return { 'statusCode': STATUS_CODE, 'body': json.dumps(RES) }
+		return { 'statusCode': STATUS_CODE, 'body': json.dumps(RES, default=str) }

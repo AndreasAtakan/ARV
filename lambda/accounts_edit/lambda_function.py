@@ -5,20 +5,22 @@ import base64
 import psycopg2
 from psycopg2 import sql
 import boto3
+from common.common import user_account_access
 
 DB_HOST = os.getenv('DB_HOST')
 DB_NAME = os.getenv('DB_NAME')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
-BUCKET_NAME = ''
+BUCKET_NAME = os.getenv('BUCKET_NAME')
 
 MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
 def lambda_handler(event, context):
 	event = parse_multipart(event['body'], event['headers']['Content-Type'])
-	if 'id' not in event: return { 'statusCode': 422, 'body': json.dumps({'error': 'Missing field in request'}) }
-
+	if 'id' not in event or \
+	   'username' not in event: return { 'statusCode': 422, 'body': json.dumps({'error': 'Missing field in request'}) }
 	_id = event['id']
+	username = event['username']
 	title = event.get('title', None)
 	description = event.get('description', None)
 	thumbnail = event.get('thumbnail', None)
@@ -30,6 +32,8 @@ def lambda_handler(event, context):
 		conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD)
 		conn.autocommit = True
 		cur = conn.cursor()
+
+		if not user_account_access(username _id, cur): return { 'statusCode': 401, 'body': json.dumps({'error': 'Unauthorized'}) }
 
 		if title is not None:
 			cur.execute('UPDATE arv.\"Accounts\" SET title = %s WHERE id = %s', (title,_id))
@@ -55,4 +59,4 @@ def lambda_handler(event, context):
 
 	finally:
 		cur.close(); conn.close()
-		return { 'statusCode': STATUS_CODE, 'body': json.dumps(RES) }
+		return { 'statusCode': STATUS_CODE, 'body': json.dumps(RES, default=str) }
