@@ -85,7 +85,7 @@ def user_account_access(username, _id, cursor):
 def account_kommune(_id, cursor):
 	try:
 		cursor.execute('''
-			SELECT U.kommunenummer
+			SELECT U.kommunenummer IS NOT NULL
 			FROM
 				arv.\"User_Org\" AS U INNER JOIN
 				arv.\"Accounts\" AS A
@@ -93,5 +93,19 @@ def account_kommune(_id, cursor):
 			WHERE A.id = %s
 		''', (_id,))
 		row = cursor.fetchone()
-		return row[0] is not None
+		return row[0]
+	except Exception as e: return False
+
+
+
+def user_planfil_access(username, filename, cursor):
+	try:
+		cursor.execute('''
+			SELECT U.org_id = P.organization_id
+			FROM
+				(SELECT org_id FROM arv.\"User_Org\" WHERE username = %s) AS U,
+				(SELECT org_id FROM arv.\"Planfiler\" WHERE filename = %s) AS P
+		''', (username,filename))
+		row = cursor.fetchone()
+		return row[0]
 	except Exception as e: return False

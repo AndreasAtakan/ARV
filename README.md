@@ -6,6 +6,13 @@ This repository contains the source-code for the GeoTales area-accounting system
 
 ##### Arbeidslogg
 
+<u>30.des 2024</u>
+TODO;
+1. rydde opp i security-groups for lambda funksjonene på AWS
+2. implementere Cognito login kode i HTML frontend
+
+
+
 X <u>28.feb 2024</u>
 Todo;
 Auto-analysen tar ikke med gul-til-grønn overføring fordi den fjerner allerede bebygde områder før dne beregner arealformålsendringene.

@@ -5,7 +5,7 @@ import base64
 import psycopg2
 from psycopg2 import sql
 import boto3
-from common.common import user_account_access
+from common.common import parse_multipart, user_account_access
 
 DB_HOST = os.getenv('DB_HOST')
 DB_NAME = os.getenv('DB_NAME')
@@ -44,9 +44,9 @@ def lambda_handler(event, context):
 		if thumbnail is not None:
 			if thumbnail.type.lower() not in MIME_TYPES: raise ValueError('File type not allowed.')
 			fil = base64.b64decode(event[thumbnail.key].content)
-			upload = f'{uuid.uuid4()}-{thumbnail.name}'
-			s3_client.put_object(Bucket=BUCKET_NAME, Key=upload, Body=fil)
-			upload = f'https://{BUCKET_NAME}.s3.amazonaws.com/{upload}'
+			key = f'{uuid.uuid4()}-{thumbnail.name}'
+			s3_client.put_object(Bucket=BUCKET_NAME, Key=key, Body=fil)
+			upload = f'https://{BUCKET_NAME}.s3.amazonaws.com/{key}'
 			cur.execute('UPDATE arv.\"Accounts\" SET thumbnail = %s WHERE id = %s', (upload,_id))
 
 		RES = {'status': 'success'}

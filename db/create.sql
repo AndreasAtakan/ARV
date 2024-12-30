@@ -19,6 +19,13 @@ CREATE TABLE IF NOT EXISTS arv."User_Org" (
 	PRIMARY KEY (id)
 );
 
+CREATE TABLE IF NOT EXISTS arv."Planfiler" (
+	id uuid DEFAULT uuid_generate_v4(),
+	org_id varchar(250) NOT NULL,
+	filename varchar(250) NOT NULL,
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE IF NOT EXISTS arv."Accounts" (
 	id uuid DEFAULT uuid_generate_v4(),
 	org_id uuid NOT NULL,

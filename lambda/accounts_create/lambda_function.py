@@ -1,23 +1,25 @@
 import json
+import uuid
 import os
 import base64
 import psycopg2
 from psycopg2 import sql
+import boto3
+from common.common import parse_multipart, get_org
 
 DB_HOST = os.getenv('DB_HOST')
 DB_NAME = os.getenv('DB_NAME')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
-BUCKET_NAME = ''
+BUCKET_NAME = os.getenv('BUCKET_NAME')
 
 MIME_TYPES = ['application/zip', 'application/gml+xml', 'application/geopackage+sqlite3', 'application/octet-stream']
 
 def lambda_handler(event, context):
 	event = parse_multipart(event['body'], event['headers']['Content-Type'])
-	if 'user_id' not in event or \
+	if 'username' not in event or \
 	   'title' not in event: return { 'statusCode': 422, 'body': json.dumps({'error': 'Missing field in request'}) }
-
-	user_id = event['user_id']
+	username = event['username']
 	title = event['title']
 	description = event.get('description', None)
 	planer = event.get('planer', None) # tekstfelt med liste av planfiner som allerede finnes i S3
@@ -28,7 +30,11 @@ def lambda_handler(event, context):
 
 	try:
 		conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD)
+		conn.autocommit = True
 		cur = conn.cursor()
+
+		org_id = get_org(username, cur)
+		if not org_id: return { 'statusCode': 401, 'body': json.dumps({'error': 'Unauthorized'}) }
 
 		# planfiler struktur; [ { name, type, key; 'fil_$i' } ]
 		# event['fil_$i'] er filens binære data
@@ -38,7 +44,8 @@ def lambda_handler(event, context):
 			for fil in planfiler:
 				if fil.type.lower() not in MIME_TYPES: raise ValueError('File type not allowed.')
 				body = base64.b64decode(event[fil.key].content)
-				s3_client.put_object(Bucket=BUCKET_NAME, Key=fil.name, Body=body)
+				key = f'{uuid.uuid4()}-{fil.name}'
+				s3_client.put_object(Bucket=BUCKET_NAME, Key=key, Body=body)
 
 		# TODO
 
@@ -52,4 +59,4 @@ def lambda_handler(event, context):
 
 	finally:
 		cur.close(); conn.close()
-		return { 'statusCode': STATUS_CODE, 'body': json.dumps(RES) }
+		return { 'statusCode': STATUS_CODE, 'body': json.dumps(RES, default=str) }

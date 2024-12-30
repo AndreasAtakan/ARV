@@ -56,7 +56,7 @@ def lambda_handler(event, context):
 		row = cur.fetchone()
 		RES['overlapp'] = row[0]
 
-		if True: # TODO; if arealregnskapet er dekket i grunnkart_for_arealregnskap
+		if False: # TODO; if arealregnskapet er dekket i grunnkart_for_arealregnskap
 			q = sql.SQL(
 				'''SELECT
 					json_build_object(
@@ -83,7 +83,7 @@ def lambda_handler(event, context):
 			row = cur.fetchone()
 			RES['natur'] = row[0]
 
-		if account_kommune(_id, cur): # er eier organisasjon en kommune?
+		if account_kommune(_id, cur): # er eierorganisasjon en kommune?
 			q = sql.SQL(
 				'''SELECT
 					json_build_object(
